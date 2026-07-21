@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quick Order | Connexion</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/plugins.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
+          linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+      }
+      .auth-card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(255,255,255,0.96);
+        border-radius: 24px;
+        box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+        border: 1px solid rgba(255,255,255,0.45);
+        backdrop-filter: blur(8px);
+      }
+      .auth-brand {
+        color: #0f172a;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+      }
+      .auth-card .form-label {
+        font-weight: 600;
+        color: #334155;
+      }
+      .auth-card .form-control {
+        border-radius: 14px;
+        border: 1px solid #dbe3f0;
+        padding: 12px 14px;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+      }
+      .auth-card .form-control:focus {
+        border-color: #1d4ed8;
+        box-shadow: 0 0 0 0.2rem rgba(29,78,216,0.15);
+      }
+      .auth-card .btn-primary {
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+        border: none;
+      }
+      .auth-card a {
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="auth-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <h3 class="auth-brand mb-2">Quick Order</h3>
+          <p class="text-muted mb-0">Connexion à votre espace de gestion</p>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}" />
+
+          <div class="mb-3">
+            <label class="form-label" for="username">Nom d’utilisateur</label>
+            <input class="form-control" id="username" name="username" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="password">Mot de passe</label>
+            <input class="form-control" id="password" name="password" type="password" required />
+          </div>
+
+          {% if form and form.errors %}
+            <div class="alert alert-danger py-2">Identifiants invalides</div>
+          {% endif %}
+
+          <button class="btn btn-primary w-100 mb-3" type="submit">Connexion</button>
+        </form>
+
+        <div class="text-center">
+          <span class="text-muted">Pas encore de compte ?</span>
+          <a href="{% url 'register' %}" class="ms-1">Créer un compte</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

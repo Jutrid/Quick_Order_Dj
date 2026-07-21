@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+db.sqlite3
+order_app/__pycache__
+user_app/__pycache__
+.venv/
+venv/

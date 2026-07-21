@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+  <div>
+    <h3 class="fw-bold mb-3">Tableau de bord Quick Order</h3>
+    <h6 class="op-7 mb-2">Gestion des commandes, livraisons, factures et stock</h6>
+  </div>
+  <div class="ms-md-auto py-2 py-md-0">
+    <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
+    <a href="#" class="btn btn-primary btn-round">Nouvelle commande</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-icon">
+            <div class="icon-big text-center icon-primary bubble-shadow-small">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+          </div>
+          <div class="col col-stats ms-3 ms-sm-0">
+            <div class="numbers">
+              <p class="card-category">Commandes</p>
+              <h4 class="card-title">248</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-icon">
+            <div class="icon-big text-center icon-info bubble-shadow-small">
+              <i class="fas fa-truck"></i>
+            </div>
+          </div>
+          <div class="col col-stats ms-3 ms-sm-0">
+            <div class="numbers">
+              <p class="card-category">Livraisons</p>
+              <h4 class="card-title">186</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-icon">
+            <div class="icon-big text-center icon-success bubble-shadow-small">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+          </div>
+          <div class="col col-stats ms-3 ms-sm-0">
+            <div class="numbers">
+              <p class="card-category">Factures</p>
+              <h4 class="card-title">94</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-icon">
+            <div class="icon-big text-center icon-secondary bubble-shadow-small">
+              <i class="fas fa-boxes"></i>
+            </div>
+          </div>
+          <div class="col col-stats ms-3 ms-sm-0">
+            <div class="numbers">
+              <p class="card-category">Stock</p>
+              <h4 class="card-title">1 240</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-8">
+    <div class="card card-round">
+      <div class="card-header">
+        <div class="card-head-row">
+          <div class="card-title">Évolution des livraisons</div>
+          <div class="card-tools">
+            <a href="#" class="btn btn-label-success btn-round btn-sm me-2">Exporter</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="position: relative; height: 300px;">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-round mt-4">
+      <div class="card-header">
+        <div class="card-head-row">
+          <div class="card-title">Activités récentes</div>
+          <div class="card-tools">
+            <a href="#" class="btn btn-label-success btn-round btn-sm me-2">Exporter</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Client</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#CMD-1024</td>
+                <td>Commande</td>
+                <td><span class="badge badge-success">Livrée</span></td>
+                <td>Amine K.</td>
+              </tr>
+              <tr>
+                <td>#LVR-205</td>
+                <td>Livraison</td>
+                <td><span class="badge badge-warning">En cours</span></td>
+                <td>Sarah B.</td>
+              </tr>
+              <tr>
+                <td>#FAC-340</td>
+                <td>Facture</td>
+                <td><span class="badge badge-info">Payée</span></td>
+                <td>Youssef M.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card card-primary card-round">
+      <div class="card-header">
+        <div class="card-title">Résumé rapide</div>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Livraisons en retard</span><strong>7</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Produits à réapprovisionner</span><strong>12</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Factures impayées</span><strong>3</strong>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/plugin/chart.js/chart.min.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('lineChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil'],
+        datasets: [{
+          label: 'Livraisons réalisées',
+          data: [45, 60, 72, 58, 81, 95, 110],
+          borderColor: '#1572E8',
+          backgroundColor: 'rgba(21, 114, 232, 0.15)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointHoverRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#6b7280' }
+          },
+          x: {
+            ticks: { color: '#6b7280' }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

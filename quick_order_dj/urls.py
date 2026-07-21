@@ -22,7 +22,11 @@ from user_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.logIn),
+    path('', views.logIn, name='home'),
+    path('login/', views.logIn, name='login'),
+    path('register/', views.register, name='register'),
+    path('logout/', views.log_out, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 ]
 
 # Servir les fichiers médias en développement

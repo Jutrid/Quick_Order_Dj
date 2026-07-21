@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quick Order | Création de compte</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/plugins.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 30%),
+          linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+      }
+      .auth-card {
+        width: 100%;
+        max-width: 520px;
+        background: rgba(255,255,255,0.96);
+        border-radius: 24px;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+        border: 1px solid rgba(255,255,255,0.45);
+        backdrop-filter: blur(8px);
+      }
+      .auth-brand {
+        color: #0f172a;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+      }
+      .auth-card .form-label {
+        font-weight: 600;
+        color: #334155;
+      }
+      .auth-card .form-control {
+        border-radius: 14px;
+        border: 1px solid #dbe3f0;
+        padding: 12px 14px;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+      }
+      .auth-card .form-control:focus {
+        border-color: #1d4ed8;
+        box-shadow: 0 0 0 0.2rem rgba(29,78,216,0.15);
+      }
+      .auth-card .btn-primary {
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+        border: none;
+      }
+      .auth-card a {
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="auth-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <h3 class="auth-brand mb-2">Créer un compte</h3>
+          <p class="text-muted mb-0">Rejoignez Quick Order pour gérer vos opérations</p>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="id_username">Nom d’utilisateur</label>
+              {{ form.username }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="id_email">Email</label>
+              <input type="email" class="form-control" id="id_email" name="email" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="id_password1">Mot de passe</label>
+              {{ form.password1 }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="id_password2">Confirmation</label>
+              {{ form.password2 }}
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="id_first_name">Prénom</label>
+              <input class="form-control" id="id_first_name" name="first_name" />
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="id_last_name">Nom</label>
+              <input class="form-control" id="id_last_name" name="last_name" />
+            </div>
+          </div>
+
+          {% if form.errors %}
+            <div class="alert alert-danger mt-3 py-2">
+              {{ form.errors }}
+            </div>
+          {% endif %}
+
+          <button class="btn btn-primary w-100 mt-3" type="submit">Créer mon compte</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <span class="text-muted">Vous avez déjà un compte ?</span>
+          <a href="{% url 'login' %}" class="ms-1">Se connecter</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

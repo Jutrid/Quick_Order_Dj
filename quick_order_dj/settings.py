@@ -122,7 +122,6 @@ STATIC_URL = 'static/'
 # Emplacement des fichiers statiques à collecter
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    Path(r"c:\Users\jutri\Documents\Jun\kaiadmin-lite-1.2.0"),
 ]
 
 # Emplacement où Django rassemblera tous les fichiers statiques lors du déploiement

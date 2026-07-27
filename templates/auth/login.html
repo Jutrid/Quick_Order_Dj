@@ -5,9 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quick Order | Connexion</title>
-    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/css/plugins.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}" />
+    <link rel="icon" href="{% static 'img/kaiadmin/favicon.png' %}" type="image/x-icon" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/plugins.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/kaiadmin.min.css' %}" />
     <style>
       body {
         margin: 0;
@@ -65,7 +66,9 @@
     <div class="container">
       <div class="auth-card p-4 p-md-5">
         <div class="text-center mb-4">
-          <h3 class="auth-brand mb-2">Quick Order</h3>
+          <div class="my-2">
+            <img src="{% static 'img/kaiadmin/logo_blue.png' %}" width="85%" alt="">
+          </div>
           <p class="text-muted mb-0">Connexion à votre espace de gestion</p>
         </div>
 
@@ -92,7 +95,7 @@
 
         <div class="text-center">
           <span class="text-muted">Pas encore de compte ?</span>
-          <a href="{% url 'register' %}" class="ms-1">Créer un compte</a>
+          <a href="{% url 'register' %}" class="ms-1">Contactez l'administrateur</a>
         </div>
       </div>
     </div>

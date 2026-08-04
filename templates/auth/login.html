@@ -24,7 +24,7 @@
       .auth-card {
         width: 100%;
         max-width: 440px;
-        background: rgba(255,255,255,0.96);
+        background: rgba(255,255,255,0.82);
         border-radius: 24px;
         box-shadow: 0 22px 60px rgba(0,0,0,0.28);
         border: 1px solid rgba(255,255,255,0.45);
@@ -64,10 +64,11 @@
   </head>
   <body>
     <div class="container">
+      <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 100vh;">
       <div class="auth-card p-4 p-md-5">
         <div class="text-center mb-4">
           <div class="my-2">
-            <img src="{% static 'img/kaiadmin/logo_blue.png' %}" width="85%" alt="">
+            <img src="{% static 'img/kaiadmin/logo_blue.png' %}" width="85%" alt="Quick Order" />
           </div>
           <p class="text-muted mb-0">Connexion à votre espace de gestion</p>
         </div>
@@ -79,18 +80,23 @@
           <div class="mb-3">
             <label class="form-label" for="username">Nom d’utilisateur</label>
             <input class="form-control" id="username" name="username" required />
+            <div class="form-text">Saisissez l'identifiant qui vous a été fourni par l'administrateur.</div>
           </div>
 
           <div class="mb-3">
             <label class="form-label" for="password">Mot de passe</label>
             <input class="form-control" id="password" name="password" type="password" required />
+            <div class="form-text">Votre mot de passe reste strictement confidentiel.</div>
           </div>
 
           {% if form and form.errors %}
             <div class="alert alert-danger py-2">Identifiants invalides</div>
           {% endif %}
 
-          <button class="btn btn-primary w-100 mb-3" type="submit">Connexion</button>
+          <button class="btn btn-primary w-100 mb-3" id="loginBtn" type="submit">
+            <span id="loginSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            <span id="loginText">Connexion</span>
+          </button>
         </form>
 
         <div class="text-center">
@@ -98,6 +104,28 @@
           <a href="{% url 'register' %}" class="ms-1">Contactez l'administrateur</a>
         </div>
       </div>
+
+      <div class="mt-4">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <img src="{% static 'img/just_logo.svg' %}" width="46" height="37" alt="JoTech Solution" />
+          <div>
+            <div class="fw-bold text-white">Développé par JoTech Solution</div>
+            <div class="small text-white-50">Solution de gestion pour restaurants et livraisons</div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    </div>
+    <script>
+      document.querySelector('form').addEventListener('submit', function () {
+        const btn = document.getElementById('loginBtn');
+        const spinner = document.getElementById('loginSpinner');
+        const text = document.getElementById('loginText');
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        text.textContent = 'Connexion en cours…';
+      });
+    </script>
   </body>
 </html>

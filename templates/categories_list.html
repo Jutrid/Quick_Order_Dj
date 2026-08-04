@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="page-header">
-    <h3 class="fw-bold mb-3">Commandes</h3>
+    <h3 class="fw-bold mb-3">Catégories</h3>
     <ul class="breadcrumbs mb-3">
     <li class="nav-home">
         <a href="{% url "home" %}">
@@ -14,7 +14,7 @@
         <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-        <a href="#">Listes des Commandes</a>
+        <a href="#">Listes des Catégories</a>
     </li>
     </ul>
 </div>
@@ -33,8 +33,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Total commandes</p>
-                <h4 class="card-title">248</h4>
+                <p class="card-category">Total catégories</p>
+                <h4 class="card-title">12</h4>
             </div>
             </div>
         </div>
@@ -52,8 +52,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">En attente</p>
-                <h4 class="card-title">36</h4>
+                <p class="card-category">Plats</p>
+                <h4 class="card-title">54</h4>
             </div>
             </div>
         </div>
@@ -71,8 +71,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">En préparation</p>
-                <h4 class="card-title">58</h4>
+                <p class="card-category">Boissons</p>
+                <h4 class="card-title">38</h4>
             </div>
             </div>
         </div>
@@ -90,8 +90,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Livrées</p>
-                <h4 class="card-title">154</h4>
+                <p class="card-category">Produits total</p>
+                <h4 class="card-title">248</h4>
             </div>
             </div>
         </div>
@@ -106,8 +106,7 @@
 <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
     <div class="ms-md-auto py-2 py-md-0">
         <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
-        <a href="{% url 'commande_create' %}" class="btn btn-primary btn-round me-2">Nouvelle commande</a>
-        <a href="{% url 'commande_update' 1 %}" class="btn btn-outline-secondary btn-round">Modifier une commande</a>
+        <a href="{% url 'categorie_create' %}" class="btn btn-primary btn-round">Nouvelle catégorie</a>
     </div>
 </div>
 
@@ -126,99 +125,75 @@
                       >
                         <thead>
                           <tr>
-                            <th>Numéro</th>
-                            <th>Client</th>
-                            <th>Date</th>
-                            <th>Total</th>
-                            <th>Statut</th>
+                            <th>Nom</th>
+                            <th>Nombre de produits</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
                         <tfoot>
                           <tr>
-                            <th>Numéro</th>
-                            <th>Client</th>
-                            <th>Date</th>
-                            <th>Total</th>
-                            <th>Statut</th>
+                            <th>Nom</th>
+                            <th>Nombre de produits</th>
                             <th>Actions</th>
                           </tr>
                         </tfoot>
                         <tbody>
                           <tr>
-                            <td>#CMD-1024</td>
-                            <td>Amine K.</td>
-                            <td>2024/01/12</td>
-                            <td>12 500 FCFA</td>
-                            <td><span class="badge badge-success">Livrée</span></td>
+                            <td>Plats</td>
+                            <td>54</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
                           <tr>
-                            <td>#CMD-1025</td>
-                            <td>Sarah B.</td>
-                            <td>2024/01/15</td>
-                            <td>8 000 FCFA</td>
-                            <td><span class="badge badge-warning">En préparation</span></td>
+                            <td>Boissons</td>
+                            <td>38</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
                           <tr>
-                            <td>#CMD-1026</td>
-                            <td>Youssef M.</td>
-                            <td>2024/01/18</td>
-                            <td>21 000 FCFA</td>
-                            <td><span class="badge badge-danger">En attente</span></td>
+                            <td>Fast Food</td>
+                            <td>42</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
                           <tr>
-                            <td>#CMD-1027</td>
-                            <td>Fatou D.</td>
-                            <td>2024/01/20</td>
-                            <td>5 500 FCFA</td>
-                            <td><span class="badge badge-success">Livrée</span></td>
+                            <td>Desserts</td>
+                            <td>27</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
                           <tr>
-                            <td>#CMD-1028</td>
-                            <td>Moussa T.</td>
-                            <td>2024/01/22</td>
-                            <td>15 250 FCFA</td>
-                            <td><span class="badge badge-info">Prête</span></td>
+                            <td>Salades</td>
+                            <td>19</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
                           <tr>
-                            <td>#CMD-1029</td>
-                            <td>Claire N.</td>
-                            <td>2024/01/25</td>
-                            <td>9 800 FCFA</td>
-                            <td><span class="badge badge-warning">En préparation</span></td>
+                            <td>Accompagnements</td>
+                            <td>15</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>

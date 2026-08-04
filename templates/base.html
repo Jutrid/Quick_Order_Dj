@@ -113,7 +113,7 @@
         <div class="sidebar-wrapper scrollbar scrollbar-inner">
           <div class="sidebar-content">
             <ul class="nav nav-secondary">
-              <li class="nav-item active">
+              <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                 <a href="{% url 'home' %}">
                   <i class="fas fa-home"></i>
                   <p>Accueil</p>
@@ -123,76 +123,97 @@
                 <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
                 <h4 class="text-section">Gestion</h4>
               </li>
-              <li class="nav-item">
+              <li class="nav-item {% if request.resolver_match.url_name == 'order_list' %}active{% endif %}">
                 <a href="{% url "order_list" %}">
                   <i class="fas fa-shopping-cart"></i>
                   <p>Commandes</p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarLayouts">
+              <li class="nav-item {% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'tailles_list' %}active{% endif %}">
+                <a data-bs-toggle="collapse" href="#sidebarLayouts" aria-expanded="{% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'tailles_list' %}true{% else %}false{% endif %}">
                   <i class="far fa-list-alt"></i>
                   <p>Produits</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse" id="sidebarLayouts">
+                <div class="collapse {% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'tailles_list' %}show{% endif %}" id="sidebarLayouts">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="sidebar-style-2.html">
+                      <a href="{% url 'products_list' %}" class="{% if request.resolver_match.url_name == 'products_list' %}active{% endif %}">
                         <span class="sub-item">Listes des Produits</span>
                       </a>
                     </li>
                     <li>
-                      <a href="sidebar-style-2.html">
+                      <a href="{% url 'categories_list' %}" class="{% if request.resolver_match.url_name == 'categories_list' %}active{% endif %}">
                         <span class="sub-item">Categories</span>
                       </a>
                     </li>
                     <li>
-                      <a href="icon-menu.html">
+                      <a href="{% url 'tailles_list' %}" class="{% if request.resolver_match.url_name == 'tailles_list' %}active{% endif %}">
                         <span class="sub-item">Taille du produit</span>
                       </a>
                     </li>
                   </ul>
                 </div>
               </li>
-              <li class="nav-item">
+              <li class="nav-item {% if request.resolver_match.url_name == 'clients_list' %}active{% endif %}">
                 <a href="{% url "clients_list" %}">
                   <i class="fas fa-users"></i>
                   <p>Clients</p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a href="#">
+              <li class="nav-item {% if request.resolver_match.url_name == 'factures_list' %}active{% endif %}">
+                <a href="{% url 'factures_list' %}">
                   <i class="fas fa-file-invoice-dollar"></i>
                   <p>Factures</p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a href="#">
+              <li class="nav-item {% if request.resolver_match.url_name == 'paiements_list' %}active{% endif %}">
+                <a href="{% url 'paiements_list' %}">
                   <i class="fas fa-money-bill"></i>
                   <p>Paiements</p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#sideliv">
+              <li class="nav-item {% if request.resolver_match.url_name == 'users_settings' or request.resolver_match.url_name == 'groups_settings' %}active{% endif %}">
+                <a data-bs-toggle="collapse" href="#sidebarSettings" aria-expanded="{% if request.resolver_match.url_name == 'users_settings' or request.resolver_match.url_name == 'groups_settings' %}true{% else %}false{% endif %}">
+                  <i class="fas fa-cogs"></i>
+                  <p>Paramètres</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse {% if request.resolver_match.url_name == 'users_settings' or request.resolver_match.url_name == 'groups_settings' %}show{% endif %}" id="sidebarSettings">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{% url 'users_settings' %}" class="{% if request.resolver_match.url_name == 'users_settings' %}active{% endif %}">
+                        <span class="sub-item">Utilisateurs</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'groups_settings' %}" class="{% if request.resolver_match.url_name == 'groups_settings' %}active{% endif %}">
+                        <span class="sub-item">Rôles / Groupes</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item {% if request.resolver_match.url_name == 'livraisons_list' or request.resolver_match.url_name == 'adresses_livraison_list' or request.resolver_match.url_name == 'livreurs_list' %}active{% endif %}">
+                <a data-bs-toggle="collapse" href="#sideliv" aria-expanded="{% if request.resolver_match.url_name == 'livraisons_list' or request.resolver_match.url_name == 'adresses_livraison_list' or request.resolver_match.url_name == 'livreurs_list' %}true{% else %}false{% endif %}">
                   <i class="fas fa-truck"></i>
                   <p>Livraisons</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse" id="sideliv">
+                <div class="collapse {% if request.resolver_match.url_name == 'livraisons_list' or request.resolver_match.url_name == 'adresses_livraison_list' or request.resolver_match.url_name == 'livreurs_list' %}show{% endif %}" id="sideliv">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="sidebar-style-2.html">
+                      <a href="{% url 'livraisons_list' %}" class="{% if request.resolver_match.url_name == 'livraisons_list' %}active{% endif %}">
                         <span class="sub-item">Liste des livraisons</span>
                       </a>
                     </li>
                     <li>
-                      <a href="icon-menu.html">
+                      <a href="{% url 'adresses_livraison_list' %}" class="{% if request.resolver_match.url_name == 'adresses_livraison_list' %}active{% endif %}">
                         <span class="sub-item">Adresses de livraison</span>
                       </a>
                     </li>
                     <li>
-                      <a href="icon-menu.html">
+                      <a href="{% url 'livreurs_list' %}" class="{% if request.resolver_match.url_name == 'livreurs_list' %}active{% endif %}">
                         <span class="sub-item">Livreurs</span>
                       </a>
                     </li>
@@ -371,52 +392,68 @@
                     <div class="quick-actions-scroll scrollbar-outer">
                       <div class="quick-actions-items">
                         <div class="row m-0">
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-3 p-0" href="{% url 'order_list' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-danger rounded-circle">
-                                <i class="far fa-calendar-alt"></i>
+                                <i class="fas fa-shopping-cart"></i>
                               </div>
-                              <span class="text">Planning</span>
+                              <span class="text">Commandes</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-3 p-0" href="{% url 'products_list' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-warning rounded-circle">
-                                <i class="fas fa-map"></i>
+                                <i class="fas fa-boxes"></i>
                               </div>
-                              <span class="text">Livraisons</span>
+                              <span class="text">Produits</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-3 p-0" href="{% url 'clients_list' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-info rounded-circle">
-                                <i class="fas fa-file-excel"></i>
+                                <i class="fas fa-users"></i>
                               </div>
-                              <span class="text">Rapports</span>
+                              <span class="text">Clients</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-3 p-0" href="{% url 'factures_list' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-success rounded-circle">
-                                <i class="fas fa-envelope"></i>
-                              </div>
-                              <span class="text">Mails</span>
-                            </div>
-                          </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
-                            <div class="quick-actions-item">
-                              <div class="avatar-item bg-primary rounded-circle">
                                 <i class="fas fa-file-invoice-dollar"></i>
                               </div>
                               <span class="text">Factures</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-3 p-0" href="{% url 'paiements_list' %}">
                             <div class="quick-actions-item">
-                              <div class="avatar-item bg-secondary rounded-circle">
+                              <div class="avatar-item bg-primary rounded-circle">
                                 <i class="fas fa-credit-card"></i>
                               </div>
                               <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-3 p-0" href="{% url 'livraisons_list' %}">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-secondary rounded-circle">
+                                <i class="fas fa-truck"></i>
+                              </div>
+                              <span class="text">Livraisons</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-3 p-0" href="{% url 'adresses_livraison_list' %}">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-dark rounded-circle">
+                                <i class="fas fa-map-marker-alt"></i>
+                              </div>
+                              <span class="text">Adresses</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-3 p-0" href="{% url 'livreurs_list' %}">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-light rounded-circle text-dark">
+                                <i class="fas fa-user-tie"></i>
+                              </div>
+                              <span class="text">Livreurs</span>
                             </div>
                           </a>
                         </div>
@@ -455,7 +492,7 @@
                         <a class="dropdown-item" href="#">Paramètres</a>
                         <a class="dropdown-item" href="#">Messages</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Déconnexion</a>
+                        <a class="dropdown-item" href="{% url 'logout' %}" id="logout-link">Déconnexion</a>
                       </li>
                     </div>
                   </ul>
@@ -471,29 +508,16 @@
           </div>
         </main>
         <footer class="footer">
-            <div class="container-fluid d-flex justify-content-between">
-              <nav class="pull-left">
-                <ul class="nav">
-                  <li class="nav-item">
-                    <a class="nav-link" href="http://www.themekita.com">
-                      ThemeKita
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#"> Help </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#"> Licenses </a>
-                  </li>
-                </ul>
-              </nav>
-              <div class="copyright">
-                2024, made with <i class="fa fa-heart heart text-danger"></i> by
-                <a href="http://www.themekita.com">ThemeKita</a>
+            <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <img src="{% static 'img/just_logo.svg' %}" alt="JoTech Solution" height="28" />
+                <span class="fw-bold">JoTech Solution</span>
+              </div>
+              <div class="text-muted">
+                Développé avec Django • Solution de gestion pour restaurants et livraisons
               </div>
               <div>
-                Distributed by
-                <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
+                <a class="text-decoration-none" href="#">Support</a>
               </div>
             </div>
           </footer>
@@ -502,6 +526,28 @@
 
     <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/core/popper.min.js' %}"></script>
+    <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+          logoutLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            swal({
+              title: 'Déconnexion',
+              text: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+              icon: 'warning',
+              buttons: ['Annuler', 'Oui, quitter'],
+              dangerMode: true,
+            }).then((willLogout) => {
+              if (willLogout) {
+                window.location.href = logoutLink.getAttribute('href');
+              }
+            });
+          });
+        }
+      });
+    </script>
     <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
     <script src="{% static 'js/kaiadmin.min.js' %}"></script>

@@ -27,6 +27,10 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('logout/', views.log_out, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('settings/users/', views.users_settings, name='users_settings'),
+    path('settings/users/create/', views.user_create, name='user_create'),
+    path('settings/groups/', views.groups_settings, name='groups_settings'),
+    path('settings/groups/create/', views.group_create, name='group_create'),
     path('', include('order_app.urls')),
 
 ]

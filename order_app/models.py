@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 
 
 # =====================================================
@@ -59,8 +60,24 @@ class Produit(models.Model):
 
     disponible = models.BooleanField(default=True)
 
+    soumis_stock = models.BooleanField(
+        default=False,
+        help_text="Cochez si le produit doit être géré en stock"
+    )
+
+    stock = models.PositiveIntegerField(
+        default=0,
+        help_text="Quantité en stock"
+    )
+
+    temps_preparation_defini = models.BooleanField(
+        default=False,
+        help_text="Cochez pour définir un temps de préparation"
+    )
+
     temps_preparation = models.PositiveIntegerField(
-        default=15,
+        null=True,
+        blank=True,
         help_text="Temps de préparation en minutes"
     )
 
@@ -107,15 +124,15 @@ class AdresseLivraison(models.Model):
     adresse = models.TextField()
 
     latitude = models.DecimalField(
-        max_digits=10,
-        decimal_places=7,
+        max_digits=20,
+        decimal_places=17,
         null=True,
         blank=True
     )
 
     longitude = models.DecimalField(
-        max_digits=10,
-        decimal_places=7,
+        max_digits=20,
+        decimal_places=17,
         null=True,
         blank=True
     )
@@ -148,7 +165,9 @@ class Commande(models.Model):
 
     adresse_livraison = models.ForeignKey(
         AdresseLivraison,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True
     )
 
     date_commande = models.DateTimeField(auto_now_add=True)
@@ -170,6 +189,19 @@ class Commande(models.Model):
     heure_souhaitee = models.TimeField(
         null=True,
         blank=True
+    )
+
+    a_livree = models.BooleanField(
+        default=False,
+        help_text="Cochez si la commande doit être livrée"
+    )
+
+    livreur = models.ForeignKey(
+        'Livreur',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="commandes"
     )
 
     statut = models.CharField(
@@ -256,6 +288,16 @@ class Facture(models.Model):
         choices=Statut.choices,
         default=Statut.NON_PAYEE
     )
+
+    @property
+    def montant_paye(self):
+        return self.paiements.filter(statut=Paiement.Statut.VALIDE).aggregate(
+            total=Sum('montant')
+        )['total'] or 0
+
+    @property
+    def montant_restant(self):
+        return self.montant - self.montant_paye
 
     def __str__(self):
         return self.numero

@@ -66,6 +66,8 @@ class ProduitAdmin(admin.ModelAdmin):
         "taille",
         "prix",
         "disponible",
+        "soumis_stock",
+        "stock",
         "temps_preparation",
     )
 
@@ -73,6 +75,7 @@ class ProduitAdmin(admin.ModelAdmin):
         "categorie",
         "taille",
         "disponible",
+        "soumis_stock",
     )
 
     search_fields = (

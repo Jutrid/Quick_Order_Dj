@@ -1,1 +1,114 @@
-{% extends 'forms/base_form.html' %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">{{ title }}</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">{{ title }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="card-title mb-0">{{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2">{{ form.non_field_errors|join:", " }}</div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        {% if field.name == 'disponible' or field.name == 'soumis_stock' or field.name == 'temps_preparation_defini' %}
+                            <div class="mb-3 form-check">
+                                {{ field }}
+                                <label class="form-check-label ms-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        {% elif field.name == 'stock' %}
+                            <div class="mb-3" id="field-stock">
+                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        {% elif field.name == 'temps_preparation' %}
+                            <div class="mb-3" id="field-temps-preparation">
+                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">Retour</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var soumisStock = document.getElementById('id_soumis_stock');
+    var stockField = document.getElementById('field-stock');
+    var tempsDefini = document.getElementById('id_temps_preparation_defini');
+    var tempsField = document.getElementById('field-temps-preparation');
+
+    function toggleVisibility() {
+      if (stockField && soumisStock) {
+        stockField.style.display = soumisStock.checked ? '' : 'none';
+      }
+      if (tempsField && tempsDefini) {
+        tempsField.style.display = tempsDefini.checked ? '' : 'none';
+      }
+    }
+
+    if (soumisStock) soumisStock.addEventListener('change', toggleVisibility);
+    if (tempsDefini) tempsDefini.addEventListener('change', toggleVisibility);
+    toggleVisibility();
+  });
+</script>
+{% endblock %}

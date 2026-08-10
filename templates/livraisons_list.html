@@ -34,7 +34,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total livraisons</p>
-                <h4 class="card-title">186</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">En route</p>
-                <h4 class="card-title">12</h4>
+                <h4 class="card-title">{{ en_route }}</h4>
             </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Livrées</p>
-                <h4 class="card-title">158</h4>
+                <h4 class="card-title">{{ livrees }}</h4>
             </div>
             </div>
         </div>
@@ -91,22 +91,12 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">En attente</p>
-                <h4 class="card-title">16</h4>
+                <h4 class="card-title">{{ en_attente }}</h4>
             </div>
             </div>
         </div>
         </div>
     </div>
-    </div>
-</div>
-
-{% comment %} ------------------------------------------ {% endcomment %}
-
-{% comment %} Bouton {% endcomment %}
-<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-    <div class="ms-md-auto py-2 py-md-0">
-        <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
-        <a href="#" class="btn btn-primary btn-round">Nouvelle livraison</a>
     </div>
 </div>
 
@@ -115,7 +105,7 @@
 <div class="col-md-12">
                 <div class="card">
                   <div class="card-header">
-                    <h4 class="card-title">Multi Filter Select</h4>
+                    <h4 class="card-title">Liste des livraisons</h4>
                   </div>
                   <div class="card-body">
                     <div class="table-responsive">
@@ -130,6 +120,7 @@
                             <th>Client</th>
                             <th>Livreur</th>
                             <th>Adresse</th>
+                            <th>Coût</th>
                             <th>Statut</th>
                             <th>Actions</th>
                           </tr>
@@ -141,95 +132,43 @@
                             <th>Client</th>
                             <th>Livreur</th>
                             <th>Adresse</th>
+                            <th>Coût</th>
                             <th>Statut</th>
                             <th>Actions</th>
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for livraison in livraisons %}
                           <tr>
-                            <td>#LVR-0201</td>
-                            <td>#CMD-1024</td>
-                            <td>Amine K.</td>
-                            <td>Ibrahim S.</td>
-                            <td>12 Rue des Manguiers, Dakar</td>
-                            <td><span class="badge badge-success">Livrée</span></td>
+                            <td>LVR-{{ livraison.pk|stringformat:"06d" }}</td>
+                            <td>{{ livraison.commande.numero }}</td>
+                            <td>{{ livraison.commande.client.nom }} {{ livraison.commande.client.prenom }}</td>
+                            <td>{% if livraison.livreur %}{{ livraison.livreur.nom }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                            <td>{{ livraison.adresse }}</td>
+                            <td>{{ livraison.cout_livraison|floatformat:0 }} FCFA</td>
+                            <td>
+                              {% if livraison.statut == 'LIVREE' %}
+                                <span class="badge badge-success">Livrée</span>
+                              {% elif livraison.statut == 'EN_ROUTE' %}
+                                <span class="badge badge-warning">En route</span>
+                              {% elif livraison.statut == 'ANNULEE' %}
+                                <span class="badge badge-secondary">Annulée</span>
+                              {% else %}
+                                <span class="badge badge-danger">En attente</span>
+                              {% endif %}
+                            </td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <a href="{% url 'livraison_detail' livraison.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir le détail"><i class="icon-eye"></i></a>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-info btn-livraison-statut" data-url="{% url 'livraison_statut' livraison.pk %}" data-name="{{ livraison.commande.numero }}" data-statut="{{ livraison.statut }}" data-original-title="Changer le statut"><i class="icon-options"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>#LVR-0202</td>
-                            <td>#CMD-1025</td>
-                            <td>Sarah B.</td>
-                            <td>Moussa T.</td>
-                            <td>Av. Cheikh Anta Diop, Dakar</td>
-                            <td><span class="badge badge-warning">En route</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="8" class="text-center text-muted py-4">Aucune livraison pour le moment. Une livraison est créée automatiquement lorsqu'une commande « à livrer » passe au statut « Prête ».</td>
                           </tr>
-                          <tr>
-                            <td>#LVR-0203</td>
-                            <td>#CMD-1026</td>
-                            <td>Youssef M.</td>
-                            <td>—</td>
-                            <td>Cite Keur Gorgui, Guédiawaye</td>
-                            <td><span class="badge badge-danger">En attente</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>#LVR-0204</td>
-                            <td>#CMD-1027</td>
-                            <td>Fatou D.</td>
-                            <td>Ibrahim S.</td>
-                            <td>Boulevard du Centenaire, Dakar</td>
-                            <td><span class="badge badge-success">Livrée</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>#LVR-0205</td>
-                            <td>#CMD-1028</td>
-                            <td>Moussa T.</td>
-                            <td>Oumar B.</td>
-                            <td>Route de Rufisque, Pikine</td>
-                            <td><span class="badge badge-warning">En route</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>#LVR-0206</td>
-                            <td>#CMD-1029</td>
-                            <td>Claire N.</td>
-                            <td>—</td>
-                            <td>Résidence Almadies, Dakar</td>
-                            <td><span class="badge badge-danger">En attente</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -238,4 +177,62 @@
               </div>
 
 
+<form id="form-livraison-statut" method="post" style="display: none;">
+  {% csrf_token %}
+  <input type="hidden" name="statut" value="">
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ statuts|json_script:"livraison-statuts-data" }}
+<script>
+$(document).ready(function () {
+    var statuts = JSON.parse(document.getElementById('livraison-statuts-data').textContent);
+
+    function statutLabel(value) {
+        for (var i = 0; i < statuts.length; i++) {
+            if (statuts[i][0] === value) return statuts[i][1];
+        }
+        return value;
+    }
+
+    $(document).on('click', '.btn-livraison-statut', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var current = $btn.data('statut');
+        var options = statuts.map(function (s) {
+            var sel = s[0] === current ? ' selected' : '';
+            return '<option value="' + s[0] + '"' + sel + '>' + s[1] + '</option>';
+        }).join('');
+        var html = '<div class="text-start">' +
+            '<label for="swal-statut-livraison" style="display:block;margin-bottom:.35rem;font-size:14px;color:#555;">Nouveau statut de la livraison</label>' +
+            '<select id="swal-statut-livraison" class="form-select" style="width:100%;padding:.5rem .75rem;border:1px solid #ced4da;border-radius:.25rem;">' + options + '</select>' +
+            '</div>';
+        swal({
+            title: 'Changer le statut de livraison',
+            text: 'Livraison de la commande « ' + $btn.data('name') + ' » — statut actuel : ' + statutLabel(current),
+            icon: 'info',
+            content: { element: 'div', attributes: { innerHTML: html } },
+            buttons: ['Annuler', 'Changer'],
+        }).then(function (willChange) {
+            if (willChange) {
+                var statut = $('#swal-statut-livraison').val();
+                if (!statut) return;
+                $('#form-livraison-statut input[name="statut"]').val(statut);
+                $('#form-livraison-statut').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+
+    {% if statut_updated %}
+    swal({
+        title: 'Statut mis à jour',
+        text: 'La livraison est maintenant : {{ statut_updated|lower }}.',
+        icon: 'success',
+        button: 'Fermer',
+    });
+    {% endif %}
+});
+</script>
 {% endblock %}

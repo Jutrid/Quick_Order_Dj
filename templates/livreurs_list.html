@@ -34,7 +34,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total livreurs</p>
-                <h4 class="card-title">18</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Disponibles</p>
-                <h4 class="card-title">9</h4>
+                <h4 class="card-title">{{ disponibles }}</h4>
             </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">En livraison</p>
-                <h4 class="card-title">6</h4>
+                <h4 class="card-title">{{ en_livraison }}</h4>
             </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Inactifs</p>
-                <h4 class="card-title">3</h4>
+                <h4 class="card-title">{{ inactifs }}</h4>
             </div>
             </div>
         </div>
@@ -105,7 +105,6 @@
 {% comment %} Bouton {% endcomment %}
 <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
     <div class="ms-md-auto py-2 py-md-0">
-        <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
         <a href="{% url 'livreur_create' %}" class="btn btn-primary btn-round">Nouveau livreur</a>
     </div>
 </div>
@@ -115,7 +114,7 @@
 <div class="col-md-12">
                 <div class="card">
                   <div class="card-header">
-                    <h4 class="card-title">Multi Filter Select</h4>
+                    <h4 class="card-title">Liste des livreurs</h4>
                   </div>
                   <div class="card-body">
                     <div class="table-responsive">
@@ -125,95 +124,61 @@
                       >
                         <thead>
                           <tr>
+                            <th>Photo</th>
                             <th>Nom</th>
                             <th>Téléphone</th>
                             <th>Plaque moto</th>
+                            <th>Livraisons</th>
                             <th>État</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
                         <tfoot>
                           <tr>
+                            <th>Photo</th>
                             <th>Nom</th>
                             <th>Téléphone</th>
                             <th>Plaque moto</th>
+                            <th>Livraisons</th>
                             <th>État</th>
                             <th>Actions</th>
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for livreur in livreurs %}
                           <tr>
-                            <td>Ibrahim S.</td>
-                            <td>77 111 22 33</td>
-                            <td>DK-1245-A</td>
-                            <td><span class="badge badge-success">Disponible</span></td>
+                            <td>
+                              {% if livreur.photo %}
+                                <img src="{{ livreur.photo.url }}" alt="{{ livreur.nom }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                              {% else %}
+                                <span class="avatar-sm rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="icon-user"></i></span>
+                              {% endif %}
+                            </td>
+                            <td>{{ livreur.nom }}</td>
+                            <td>{{ livreur.telephone }}</td>
+                            <td>{% if livreur.plaque_moto %}{{ livreur.plaque_moto }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                            <td>{{ livreur.nb_livraisons }}</td>
+                            <td>
+                              {% if livreur.etat == 'DISPONIBLE' %}
+                                <span class="badge badge-success">Disponible</span>
+                              {% elif livreur.etat == 'EN_LIVRAISON' %}
+                                <span class="badge badge-warning">En livraison</span>
+                              {% else %}
+                                <span class="badge badge-danger">Inactif</span>
+                              {% endif %}
+                            </td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <a href="{% url 'livreur_update' livreur.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="icon-pencil"></i></a>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-livreur" data-url="{% url 'livreur_delete' livreur.pk %}" data-name="{{ livreur.nom }}" data-original-title="Supprimer"><i class="icon-trash"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>Moussa T.</td>
-                            <td>78 444 55 66</td>
-                            <td>DK-8832-B</td>
-                            <td><span class="badge badge-warning">En livraison</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="7" class="text-center text-muted py-4">Aucun livreur pour le moment. Cliquez sur « Nouveau livreur » pour en ajouter un.</td>
                           </tr>
-                          <tr>
-                            <td>Oumar B.</td>
-                            <td>76 777 88 99</td>
-                            <td>DK-5567-C</td>
-                            <td><span class="badge badge-success">Disponible</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Cheikh D.</td>
-                            <td>70 123 45 67</td>
-                            <td>DK-9981-D</td>
-                            <td><span class="badge badge-warning">En livraison</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Amadou G.</td>
-                            <td>75 222 33 44</td>
-                            <td>DK-3344-E</td>
-                            <td><span class="badge badge-danger">Inactif</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Boubacar N.</td>
-                            <td>77 888 99 00</td>
-                            <td>DK-7712-F</td>
-                            <td><span class="badge badge-success">Disponible</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -222,4 +187,39 @@
               </div>
 
 
+<form id="form-delete-livreur" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    $(document).on('click', '.btn-delete-livreur', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        swal({
+            title: 'Supprimer ce livreur ?',
+            text: 'Le livreur « ' + $btn.data('name') + ' » sera définitivement supprimé.',
+            icon: 'warning',
+            buttons: ['Annuler', 'Oui, supprimer'],
+            dangerMode: true,
+        }).then(function (willDelete) {
+            if (willDelete) {
+                $('#form-delete-livreur').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+
+    {% if error == 'protected' %}
+    swal({
+        title: 'Suppression impossible',
+        text: 'Ce livreur est rattaché à une ou plusieurs livraisons et ne peut pas être supprimé.',
+        icon: 'error',
+        button: 'Fermer',
+    });
+    {% endif %}
+});
+</script>
 {% endblock %}

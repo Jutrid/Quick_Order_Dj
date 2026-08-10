@@ -34,7 +34,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total clients</p>
-                <h4 class="card-title">186</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -52,8 +52,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Clients actifs</p>
-                <h4 class="card-title">152</h4>
+                <p class="card-category">Avec commandes</p>
+                <h4 class="card-title">{{ avec_commandes }}</h4>
             </div>
             </div>
         </div>
@@ -71,8 +71,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Nouveaux (30j)</p>
-                <h4 class="card-title">23</h4>
+                <p class="card-category">Sans commande</p>
+                <h4 class="card-title">{{ sans_commandes }}</h4>
             </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Commandes clients</p>
-                <h4 class="card-title">+45K</h4>
+                <h4 class="card-title">{{ total_commandes }}</h4>
             </div>
             </div>
         </div>
@@ -142,78 +142,24 @@
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for client in clients %}
                           <tr>
-                            <td>Keita</td>
-                            <td>Amine</td>
-                            <td>77 123 45 67</td>
-                            <td>amine.keita@mail.com</td>
+                            <td>{{ client.nom }}</td>
+                            <td>{{ client.prenom }}</td>
+                            <td>{{ client.telephone }}</td>
+                            <td>{{ client.email }}</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <a href="{% url 'client_update' client.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></a>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-client" data-url="{% url 'client_delete' client.pk %}" data-name="{{ client.nom }} {{ client.prenom }}" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>Ba</td>
-                            <td>Sarah</td>
-                            <td>78 456 78 90</td>
-                            <td>sarah.ba@mail.com</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="5" class="text-center text-muted py-4">Aucun client pour le moment. Cliquez sur « Nouveau client » pour en ajouter un.</td>
                           </tr>
-                          <tr>
-                            <td>Mbaye</td>
-                            <td>Youssef</td>
-                            <td>76 987 65 43</td>
-                            <td>youssef.mbaye@mail.com</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Diallo</td>
-                            <td>Fatou</td>
-                            <td>70 111 22 33</td>
-                            <td>fatou.diallo@mail.com</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Touré</td>
-                            <td>Moussa</td>
-                            <td>75 444 55 66</td>
-                            <td>moussa.toure@mail.com</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Ndiaye</td>
-                            <td>Claire</td>
-                            <td>77 777 88 99</td>
-                            <td>claire.ndiaye@mail.com</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -222,4 +168,30 @@
               </div>
 
 
+<form id="form-delete-client" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    $(document).on('click', '.btn-delete-client', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        swal({
+            title: 'Supprimer ce client ?',
+            text: 'Le client « ' + $btn.data('name') + ' » ainsi que ses commandes seront définitivement supprimés.',
+            icon: 'warning',
+            buttons: ['Annuler', 'Oui, supprimer'],
+            dangerMode: true,
+        }).then(function (willDelete) {
+            if (willDelete) {
+                $('#form-delete-client').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -19,6 +19,13 @@
     </ul>
 </div>
 
+{% comment %} Bouton {% endcomment %}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div class="ms-md-auto py-2 py-md-0">
+        <a href="{% url 'paiement_create' %}" class="btn btn-primary btn-round">Nouveau paiement</a>
+    </div>
+</div>
+
 {% comment %} Card {% endcomment %}
 
  <div class="row">
@@ -34,7 +41,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total paiements</p>
-                <h4 class="card-title">186</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -53,7 +60,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Validés</p>
-                <h4 class="card-title">$ 1,345</h4>
+                <h4 class="card-title">{{ valides }}</h4>
             </div>
             </div>
         </div>
@@ -72,7 +79,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">En attente</p>
-                <h4 class="card-title">23</h4>
+                <h4 class="card-title">{{ en_attente }}</h4>
             </div>
             </div>
         </div>
@@ -91,22 +98,12 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Montant encaissé</p>
-                <h4 class="card-title">+45K</h4>
+                <h4 class="card-title">{{ encaisse|floatformat:0 }} FCFA</h4>
             </div>
             </div>
         </div>
         </div>
     </div>
-    </div>
-</div>
-
-{% comment %} ------------------------------------------ {% endcomment %}
-
-{% comment %} Bouton {% endcomment %}
-<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-    <div class="ms-md-auto py-2 py-md-0">
-        <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
-        <a href="{% url 'paiement_create' %}" class="btn btn-primary btn-round">Nouveau paiement</a>
     </div>
 </div>
 
@@ -115,7 +112,7 @@
 <div class="col-md-12">
                 <div class="card">
                   <div class="card-header">
-                    <h4 class="card-title">Multi Filter Select</h4>
+                    <h4 class="card-title">Liste des paiements</h4>
                   </div>
                   <div class="card-body">
                     <div class="table-responsive">
@@ -146,90 +143,33 @@
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for paiement in paiements %}
                           <tr>
-                            <td>PAY-2201</td>
-                            <td>#FAC-0001</td>
-                            <td>2024/01/12</td>
-                            <td>12 500 FCFA</td>
-                            <td>Mobile Money</td>
-                            <td><span class="badge badge-success">Validé</span></td>
+                            <td>{% if paiement.reference %}{{ paiement.reference }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                            <td>{{ paiement.facture.numero }}</td>
+                            <td>{{ paiement.date_paiement|date:"d/m/Y H:i" }}</td>
+                            <td>{{ paiement.montant|floatformat:0 }} FCFA</td>
+                            <td>{{ paiement.get_mode_paiement_display }}</td>
+                            <td>
+                              {% if paiement.statut == 'VALIDE' %}
+                                <span class="badge badge-success">Validé</span>
+                              {% elif paiement.statut == 'ANNULE' %}
+                                <span class="badge badge-danger">Annulé</span>
+                              {% else %}
+                                <span class="badge badge-warning">En attente</span>
+                              {% endif %}
+                            </td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-paiement" data-url="{% url 'paiement_delete' paiement.pk %}" data-name="{{ paiement.facture.numero }}" data-original-title="Supprimer"><i class="icon-trash"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>PAY-2202</td>
-                            <td>#FAC-0002</td>
-                            <td>2024/01/15</td>
-                            <td>8 000 FCFA</td>
-                            <td>Espèces</td>
-                            <td><span class="badge badge-warning">En attente</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="7" class="text-center text-muted py-4">Aucun paiement pour le moment. Cliquez sur « Nouveau paiement » pour en enregistrer un.</td>
                           </tr>
-                          <tr>
-                            <td>PAY-2203</td>
-                            <td>#FAC-0003</td>
-                            <td>2024/01/18</td>
-                            <td>21 000 FCFA</td>
-                            <td>Carte bancaire</td>
-                            <td><span class="badge badge-success">Validé</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>PAY-2204</td>
-                            <td>#FAC-0004</td>
-                            <td>2024/01/20</td>
-                            <td>5 500 FCFA</td>
-                            <td>Mobile Money</td>
-                            <td><span class="badge badge-danger">Annulé</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>PAY-2205</td>
-                            <td>#FAC-0005</td>
-                            <td>2024/01/22</td>
-                            <td>15 250 FCFA</td>
-                            <td>Paiement en ligne</td>
-                            <td><span class="badge badge-warning">En attente</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>PAY-2206</td>
-                            <td>#FAC-0006</td>
-                            <td>2024/01/25</td>
-                            <td>9 800 FCFA</td>
-                            <td>Espèces</td>
-                            <td><span class="badge badge-success">Validé</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -238,4 +178,30 @@
               </div>
 
 
+<form id="form-delete-paiement" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    $(document).on('click', '.btn-delete-paiement', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        swal({
+            title: 'Supprimer ce paiement ?',
+            text: 'Le paiement rattaché à la facture « ' + $btn.data('name') + ' » sera définitivement supprimé.',
+            icon: 'warning',
+            buttons: ['Annuler', 'Oui, supprimer'],
+            dangerMode: true,
+        }).then(function (willDelete) {
+            if (willDelete) {
+                $('#form-delete-paiement').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

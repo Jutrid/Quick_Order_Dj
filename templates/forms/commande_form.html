@@ -1,1 +1,354 @@
-{% extends 'forms/base_form.html' %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">{{ title }}</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">{{ title }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="card-title mb-0">{{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="commande-form">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors|join:", " }}</div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="{{ form.client.id_for_label }}">{{ form.client.label }}</label>
+                            {{ form.client }}
+                            {% if form.client.errors %}<div class="text-danger small">{{ form.client.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check form-check-inline pt-4">
+                                {{ form.a_livree }}
+                                <label class="form-check-label" for="{{ form.a_livree.id_for_label }}">
+                                    <i class="icon-social-twitter me-1"></i> Commande à livrer
+                                </label>
+                            </div>
+                            {% if form.a_livree.errors %}<div class="text-danger small">{{ form.a_livree.errors|join:", " }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row" id="livraison-fields">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="{{ form.adresse_livraison.id_for_label }}">{{ form.adresse_livraison.label }}</label>
+                            {{ form.adresse_livraison }}
+                            {% if form.adresse_livraison.errors %}<div class="text-danger small">{{ form.adresse_livraison.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="{{ form.livreur.id_for_label }}">{{ form.livreur.label }}</label>
+                            {{ form.livreur }}
+                            {% if form.livreur.errors %}<div class="text-danger small">{{ form.livreur.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="{{ form.frais_livraison.id_for_label }}">{{ form.frais_livraison.label }}</label>
+                            {{ form.frais_livraison }}
+                            {% if form.frais_livraison.errors %}<div class="text-danger small">{{ form.frais_livraison.errors|join:", " }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        {% if form.statut %}
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="{{ form.statut.id_for_label }}">{{ form.statut.label }}</label>
+                            {{ form.statut }}
+                            {% if form.statut.errors %}<div class="text-danger small">{{ form.statut.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="{{ form.commentaire.id_for_label }}">{{ form.commentaire.label }}</label>
+                            {{ form.commentaire }}
+                            {% if form.commentaire.errors %}<div class="text-danger small">{{ form.commentaire.errors|join:", " }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="icon-basket me-1"></i> Produits de la commande</h5>
+                        <button type="button" class="btn btn-primary btn-sm" id="add-ligne">
+                            <i class="icon-plus"></i> Ajouter un produit
+                        </button>
+                    </div>
+
+                    {{ ligne_formset.management_form }}
+                    {% if ligne_formset.non_form_errors %}
+                        <div class="alert alert-danger mb-3">{{ ligne_formset.non_form_errors|join:", " }}</div>
+                    {% endif %}
+
+                    <div id="lignes-empty" class="text-center text-muted py-4 border rounded bg-light mb-3">
+                        <i class="icon-basket mb-2 d-block" style="font-size: 2rem;"></i>
+                        Aucun produit ajouté. Cliquez sur « Ajouter un produit » pour commencer.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 45%;">Produit</th>
+                                    <th style="width: 25%;">Quantité</th>
+                                    <th style="width: 20%;" class="text-end">Sous-total</th>
+                                    <th style="width: 10%;" class="text-center">Retirer</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lignes-tbody">
+                                {% for ligne in ligne_formset %}
+                                {% if ligne.instance.pk or ligne_formset.is_bound %}
+                                <tr class="ligne-row">
+                                    <td>
+                                        {% if ligne.instance.pk %}{{ ligne.id }}{% endif %}
+                                        {{ ligne.produit }}
+                                        {% if ligne.produit.errors %}<div class="text-danger small">{{ ligne.produit.errors|join:", " }}</div>{% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm" style="max-width: 150px;">
+                                            <button type="button" class="btn btn-outline-secondary qty-minus" title="Diminuer">
+                                                <i class="icon-minus"></i>
+                                            </button>
+                                            {{ ligne.quantite }}
+                                            <button type="button" class="btn btn-outline-secondary qty-plus" title="Augmenter">
+                                                <i class="icon-plus"></i>
+                                            </button>
+                                        </div>
+                                        {% if ligne.quantite.errors %}<div class="text-danger small">{{ ligne.quantite.errors|join:", " }}</div>{% endif %}
+                                    </td>
+                                    <td class="ligne-sous-total text-end">—</td>
+                                    <td class="text-center">
+                                        <div class="d-none">{{ ligne.DELETE }}</div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-ligne" title="Retirer ce produit">
+                                            <i class="icon-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <template id="ligne-template">
+                        <tr class="ligne-row">
+                            <td>
+                                {{ ligne_formset.empty_form.produit }}
+                            </td>
+                            <td>
+                                <div class="input-group input-group-sm" style="max-width: 150px;">
+                                    <button type="button" class="btn btn-outline-secondary qty-minus" title="Diminuer">
+                                        <i class="icon-minus"></i>
+                                    </button>
+                                    {{ ligne_formset.empty_form.quantite }}
+                                    <button type="button" class="btn btn-outline-secondary qty-plus" title="Augmenter">
+                                        <i class="icon-plus"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="ligne-sous-total text-end">—</td>
+                            <td class="text-center">
+                                <div class="d-none">{{ ligne_formset.empty_form.DELETE }}</div>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-ligne" title="Retirer ce produit">
+                                    <i class="icon-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="alert alert-warning py-2 mb-0 small">
+                                <i class="icon-information me-1"></i>
+                                Le numéro de commande et le total sont calculés automatiquement.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body py-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Sous-total produits</span>
+                                        <strong id="lignes-total">0 FCFA</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Frais de livraison</span>
+                                        <strong id="frais-display">0 FCFA</strong>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="d-flex justify-content-between fs-5">
+                                        <span>Total commande</span>
+                                        <strong id="commande-total">0 FCFA</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary"><i class="icon-check me-1"></i> Enregistrer</button>
+                        <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="{% static 'css/plugins.min.css' %}">
+<script src="{% static 'js/plugin/select2/select2.full.min.js' %}"></script>
+{{ produits_prices|json_script:"produits-prices" }}
+<style>
+    #lignes-tbody .ligne-quantite { width: 64px; text-align: center; border-radius: 0; }
+    #lignes-tbody .qty-minus, #lignes-tbody .qty-plus { border-color: #dee2e6; }
+    #lignes-tbody .ligne-sous-total { font-weight: 500; }
+</style>
+<script>
+$(document).ready(function () {
+    var prices = JSON.parse(document.getElementById('produits-prices').textContent);
+
+    function initSelect2($el, placeholder) {
+        $el.select2({
+            dropdownParent: $('#commande-form'),
+            width: '100%',
+            placeholder: placeholder || '---'
+        });
+    }
+
+    function formatFCFA(n) {
+        return n.toLocaleString('fr-FR') + ' FCFA';
+    }
+
+    function updateTotalForms() {
+        $('#id_lignes-TOTAL_FORMS').val($('#lignes-tbody .ligne-row').length);
+    }
+
+    function nextRowIndex() {
+        var max = -1;
+        $('#lignes-tbody .ligne-row').each(function () {
+            var name = $(this).find('[name$="-produit"]').attr('name') || '';
+            var m = name.match(/lignes-(\d+)-produit/);
+            if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        return max + 1;
+    }
+
+    function toggleEmpty() {
+        var visible = $('#lignes-tbody .ligne-row').filter(':visible').length > 0;
+        $('#lignes-empty').toggleClass('d-none', visible);
+    }
+
+    function recalcTotal() {
+        var sousTotal = 0;
+        $('#lignes-tbody .ligne-row').each(function () {
+            var $row = $(this);
+            if ($row.find('.remove-ligne').is(':visible') === false) return;
+            var pid = $row.find('.select2-produit').val();
+            var q = parseInt($row.find('.ligne-quantite').val(), 10) || 0;
+            var prix = prices[pid] || 0;
+            var sous = prix * q;
+            $row.find('.ligne-sous-total').text(formatFCFA(sous));
+            sousTotal += sous;
+        });
+        var frais = 0;
+        if ($('#id_a_livree').is(':checked')) {
+            frais = parseFloat($('#id_frais_livraison').val()) || 0;
+        }
+        $('#lignes-total').text(formatFCFA(sousTotal));
+        $('#frais-display').text(formatFCFA(frais));
+        $('#commande-total').text(formatFCFA(sousTotal + frais));
+    }
+
+    function toggleLivraison() {
+        var show = $('#id_a_livree').is(':checked');
+        $('#livraison-fields').toggleClass('d-none', !show);
+        if (show && !$('#id_adresse_livraison').data('select2')) {
+            initSelect2($('#id_adresse_livraison'));
+            filterAdresses();
+        }
+        recalcTotal();
+    }
+
+    initSelect2($('#id_client'));
+    initSelect2($('#id_adresse_livraison'));
+    $('#lignes-tbody .ligne-row').each(function () {
+        initSelect2($(this).find('.select2-produit'), 'Choisir un produit');
+    });
+
+    function filterAdresses() {
+        var cid = $('#id_client').val();
+        $('#id_adresse_livraison option').each(function () {
+            var $opt = $(this);
+            var clientId = $opt.data('client');
+            if ($opt.val() === '' || clientId === undefined) return;
+            $opt.prop('disabled', !!(cid && String(clientId) !== String(cid)));
+        });
+        $('#id_adresse_livraison').trigger('change.select2');
+    }
+    $('#id_client').on('change', filterAdresses);
+
+    function addLigne() {
+        var index = nextRowIndex();
+        var $row = $($('#ligne-template').html().replace(/__prefix__/g, index));
+        $('#lignes-tbody').append($row);
+        $row.find('.ligne-quantite').val(1);
+        initSelect2($row.find('.select2-produit'), 'Choisir un produit');
+        updateTotalForms();
+        toggleEmpty();
+        recalcTotal();
+        $row.find('.select2-produit').select2('open');
+    }
+
+    $('#add-ligne').on('click', addLigne);
+
+    $('#lignes-tbody').on('click', '.qty-minus', function () {
+        var $q = $(this).closest('.ligne-row').find('.ligne-quantite');
+        $q.val(Math.max(1, (parseInt($q.val(), 10) || 1) - 1)).trigger('input');
+    });
+    $('#lignes-tbody').on('click', '.qty-plus', function () {
+        var $q = $(this).closest('.ligne-row').find('.ligne-quantite');
+        $q.val((parseInt($q.val(), 10) || 1) + 1).trigger('input');
+    });
+
+    $('#lignes-tbody').on('click', '.remove-ligne', function () {
+        var $row = $(this).closest('.ligne-row');
+        var $id = $row.find('[name$="-id"]');
+        if ($id.length && $id.val()) {
+            $row.find('[name$="-DELETE"]').prop('checked', true);
+            $row.hide();
+        } else {
+            $row.remove();
+        }
+        updateTotalForms();
+        toggleEmpty();
+        recalcTotal();
+    });
+
+    $('#lignes-tbody').on('change', 'select, input', recalcTotal);
+    $('#id_frais_livraison').on('input', recalcTotal);
+
+    filterAdresses();
+    $('#id_a_livree').on('change', toggleLivraison);
+    toggleLivraison();
+    updateTotalForms();
+    toggleEmpty();
+    recalcTotal();
+});
+</script>
+{% endblock %}

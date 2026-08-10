@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Détail de la livraison</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'livraisons_list' %}">Liste des livraisons</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">LVR-{{ livraison.pk|stringformat:"06d" }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <a href="{% url 'livraisons_list' %}" class="btn btn-outline-secondary btn-round"><i class="icon-arrow-left me-1"></i> Retour aux livraisons</a>
+    <div class="ms-md-auto py-2 py-md-0">
+        <span class="badge {% if livraison.statut == 'LIVREE' %}badge-success{% elif livraison.statut == 'EN_ROUTE' %}badge-warning{% elif livraison.statut == 'ANNULEE' %}badge-secondary{% else %}badge-danger{% endif %} p-2">{{ livraison.get_statut_display }}</span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Livraison LVR-{{ livraison.pk|stringformat:"06d" }}</h4>
+                <i class="icon-social-twitter text-primary" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped align-middle mb-0">
+                    <tbody>
+                        <tr>
+                            <th style="width: 40%;" class="text-muted">Commande</th>
+                            <td>{{ livraison.commande.numero }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Client</th>
+                            <td>{{ livraison.commande.client.nom }} {{ livraison.commande.client.prenom }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Téléphone</th>
+                            <td>{{ livraison.commande.client.telephone }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Livreur</th>
+                            <td>{% if livraison.livreur %}{{ livraison.livreur.nom }} — {{ livraison.livreur.telephone }}{% else %}<span class="text-muted">Non assigné</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Adresse de livraison</th>
+                            <td>{{ livraison.adresse }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Coût de livraison</th>
+                            <td>{{ livraison.cout_livraison|floatformat:0 }} FCFA</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Statut</th>
+                            <td>
+                                {% if livraison.statut == 'LIVREE' %}
+                                    <span class="badge badge-success">Livrée</span>
+                                {% elif livraison.statut == 'EN_ROUTE' %}
+                                    <span class="badge badge-warning">En route</span>
+                                {% elif livraison.statut == 'ANNULEE' %}
+                                    <span class="badge badge-secondary">Annulée</span>
+                                {% else %}
+                                    <span class="badge badge-danger">En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Date de livraison</th>
+                            <td>{% if livraison.date_livraison %}{{ livraison.date_livraison|date:"d/m/Y H:i" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Heure de départ</th>
+                            <td>{% if livraison.heure_depart %}{{ livraison.heure_depart|date:"d/m/Y H:i" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Heure d'arrivée</th>
+                            <td>{% if livraison.heure_arrivee %}{{ livraison.heure_arrivee|date:"d/m/Y H:i" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="card-title mb-0"><i class="icon-location-pin me-1"></i> Carte de la livraison</h4>
+            </div>
+            <div class="card-body">
+                <div class="border rounded p-3 bg-light">
+                    {% if coords %}
+                        <div id="map" style="height: 380px; border-radius: 0.5rem;"></div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="icon-location-pin mb-3 d-block" style="font-size: 2.5rem;"></i>
+                            <h5>Aucune position disponible</h5>
+                            <p class="mb-0">L'adresse de livraison ne possède pas de coordonnées (latitude / longitude).</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if coords %}
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+<script src="{% static 'js/plugin/leaflet/leaflet.js' %}"></script>
+<script>
+$(document).ready(function () {
+    var map = L.map('map').setView([{{ coords.lat }}, {{ coords.lon }}], 15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        detectRetina: true,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+    var marker = L.marker([{{ coords.lat }}, {{ coords.lon }}]).addTo(map);
+    marker.bindPopup('<strong>Livraison LVR-{{ livraison.pk|stringformat:"06d" }}</strong><br>{{ livraison.adresse }}').openPopup();
+});
+</script>
+{% endif %}
+{% endblock %}

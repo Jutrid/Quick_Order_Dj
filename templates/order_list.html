@@ -34,7 +34,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total commandes</p>
-                <h4 class="card-title">248</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">En attente</p>
-                <h4 class="card-title">36</h4>
+                <h4 class="card-title">{{ en_attente }}</h4>
             </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">En préparation</p>
-                <h4 class="card-title">58</h4>
+                <h4 class="card-title">{{ en_preparation }}</h4>
             </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Livrées</p>
-                <h4 class="card-title">154</h4>
+                <h4 class="card-title">{{ livrees }}</h4>
             </div>
             </div>
         </div>
@@ -106,8 +106,7 @@
 <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
     <div class="ms-md-auto py-2 py-md-0">
         <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
-        <a href="{% url 'commande_create' %}" class="btn btn-primary btn-round me-2">Nouvelle commande</a>
-        <a href="{% url 'commande_update' 1 %}" class="btn btn-outline-secondary btn-round">Modifier une commande</a>
+        <a href="{% url 'commande_create' %}" class="btn btn-primary btn-round">Nouvelle commande</a>
     </div>
 </div>
 
@@ -145,84 +144,40 @@
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for commande in commandes %}
                           <tr>
-                            <td>#CMD-1024</td>
-                            <td>Amine K.</td>
-                            <td>2024/01/12</td>
-                            <td>12 500 FCFA</td>
-                            <td><span class="badge badge-success">Livrée</span></td>
+                            <td>{{ commande.numero }}</td>
+                            <td>{{ commande.client.nom }} {{ commande.client.prenom }}</td>
+                            <td>{{ commande.date_commande|date:"d/m/Y H:i" }}</td>
+                            <td>{{ commande.total }} FCFA</td>
+                            <td>
+                              {% if commande.statut == 'EN_ATTENTE' %}
+                                <span class="badge badge-warning">En attente</span>
+                              {% elif commande.statut == 'EN_PREPARATION' %}
+                                <span class="badge badge-info">En préparation</span>
+                              {% elif commande.statut == 'PRETE' %}
+                                <span class="badge badge-primary">Prête</span>
+                              {% elif commande.statut == 'EN_LIVRAISON' %}
+                                <span class="badge badge-secondary">En livraison</span>
+                              {% elif commande.statut == 'LIVREE' %}
+                                <span class="badge badge-success">Livrée</span>
+                              {% elif commande.statut == 'ANNULEE' %}
+                                <span class="badge badge-danger">Annulée</span>
+                              {% endif %}
+                            </td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <a href="{% url 'commande_update' commande.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="icon-pencil"></i></a>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-info btn-statut-commande" data-url="{% url 'commande_statut' commande.pk %}" data-name="{{ commande.numero }}" data-statut="{{ commande.statut }}" data-original-title="Changer le statut"><i class="icon-options"></i></button>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-commande" data-url="{% url 'commande_delete' commande.pk %}" data-name="{{ commande.numero }}" data-original-title="Supprimer"><i class="icon-trash"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>#CMD-1025</td>
-                            <td>Sarah B.</td>
-                            <td>2024/01/15</td>
-                            <td>8 000 FCFA</td>
-                            <td><span class="badge badge-warning">En préparation</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="6" class="text-center text-muted py-4">Aucune commande pour le moment. Cliquez sur « Nouvelle commande » pour en créer une.</td>
                           </tr>
-                          <tr>
-                            <td>#CMD-1026</td>
-                            <td>Youssef M.</td>
-                            <td>2024/01/18</td>
-                            <td>21 000 FCFA</td>
-                            <td><span class="badge badge-danger">En attente</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>#CMD-1027</td>
-                            <td>Fatou D.</td>
-                            <td>2024/01/20</td>
-                            <td>5 500 FCFA</td>
-                            <td><span class="badge badge-success">Livrée</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>#CMD-1028</td>
-                            <td>Moussa T.</td>
-                            <td>2024/01/22</td>
-                            <td>15 250 FCFA</td>
-                            <td><span class="badge badge-info">Prête</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>#CMD-1029</td>
-                            <td>Claire N.</td>
-                            <td>2024/01/25</td>
-                            <td>9 800 FCFA</td>
-                            <td><span class="badge badge-warning">En préparation</span></td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir"><i class="fa fa-eye"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -231,4 +186,98 @@
               </div>
 
 
+<form id="form-delete-commande" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+
+<form id="form-statut-commande" method="post" style="display: none;">
+  {% csrf_token %}
+  <input type="hidden" name="statut" value="">
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ statuts|json_script:"statuts-data" }}
+<script>
+$(document).ready(function () {
+    var statuts = JSON.parse(document.getElementById('statuts-data').textContent);
+
+    function statutLabel(value) {
+        for (var i = 0; i < statuts.length; i++) {
+            if (statuts[i][0] === value) return statuts[i][1];
+        }
+        return value;
+    }
+
+    $(document).on('click', '.btn-statut-commande', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var current = $btn.data('statut');
+        var locked = ['PRETE', 'EN_LIVRAISON', 'LIVREE'];
+        if (current === 'ANNULEE') {
+            swal({
+                title: 'Commande annulée',
+                text: 'Le statut de la commande « ' + $btn.data('name') + ' » est verrouillé.',
+                icon: 'info',
+                button: 'Fermer',
+            });
+            return;
+        }
+        var available = statuts.filter(function (s) {
+            if (locked.indexOf(current) !== -1) {
+                return s[0] === 'ANNULEE';
+            }
+            return true;
+        });
+        var options = available.map(function (s) {
+            var sel = s[0] === current ? ' selected' : '';
+            return '<option value="' + s[0] + '"' + sel + '>' + s[1] + '</option>';
+        }).join('');
+        var html = '<div class="text-start">' +
+            '<label for="swal-statut" style="display:block;margin-bottom:.35rem;font-size:14px;color:#555;">Nouveau statut de la commande</label>' +
+            '<select id="swal-statut" class="form-select" style="width:100%;padding:.5rem .75rem;border:1px solid #ced4da;border-radius:.25rem;">' + options + '</select>' +
+            '</div>';
+        swal({
+            title: 'Changer le statut',
+            text: 'Commande « ' + $btn.data('name') + ' » — statut actuel : ' + statutLabel(current),
+            icon: 'info',
+            content: { element: 'div', attributes: { innerHTML: html } },
+            buttons: ['Annuler', 'Changer'],
+        }).then(function (willChange) {
+            if (willChange) {
+                var statut = $('#swal-statut').val();
+                if (!statut) return;
+                $('#form-statut-commande input[name="statut"]').val(statut);
+                $('#form-statut-commande').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+
+    {% if facture_created %}
+    swal({
+        title: 'Facture générée',
+        text: 'La commande « {{ facture_created }} » étant prête, une facture a été générée automatiquement.',
+        icon: 'success',
+        button: 'Fermer',
+    });
+    {% endif %}
+
+    $(document).on('click', '.btn-delete-commande', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        swal({
+            title: 'Supprimer cette commande ?',
+            text: 'La commande « ' + $btn.data('name') + ' » et toutes ses lignes seront définitivement supprimées.',
+            icon: 'warning',
+            buttons: ['Annuler', 'Oui, supprimer'],
+            dangerMode: true,
+        }).then(function (willDelete) {
+            if (willDelete) {
+                $('#form-delete-commande').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

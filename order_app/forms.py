@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from .models import AdresseLivraison, Categorie, Client, Commande, Facture, Livreur, Paiement, Produit, TailleProduit
+from .models import AdresseLivraison, Categorie, Client, Commande, Facture, LigneCommande, Livreur, Paiement, Produit, TailleProduit
 
 
 class CategorieForm(forms.ModelForm):
@@ -26,7 +26,20 @@ class TailleProduitForm(forms.ModelForm):
 class ProduitForm(forms.ModelForm):
     class Meta:
         model = Produit
-        fields = ['categorie', 'taille', 'reference', 'nom', 'description', 'prix', 'image', 'disponible', 'temps_preparation']
+        fields = [
+            'categorie',
+            'taille',
+            'reference',
+            'nom',
+            'description',
+            'prix',
+            'image',
+            'disponible',
+            'soumis_stock',
+            'stock',
+            'temps_preparation_defini',
+            'temps_preparation',
+        ]
         widgets = {
             'categorie': forms.Select(attrs={'class': 'form-select'}),
             'taille': forms.Select(attrs={'class': 'form-select'}),
@@ -36,8 +49,44 @@ class ProduitForm(forms.ModelForm):
             'prix': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'disponible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'temps_preparation': forms.NumberInput(attrs={'class': 'form-control'}),
+            'soumis_stock': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'stock': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'temps_preparation_defini': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'temps_preparation': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
         }
+
+    stock = forms.IntegerField(
+        required=False,
+        min_value=0,
+        initial=0,
+        label='Quantité en stock',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+    )
+
+    temps_preparation = forms.IntegerField(
+        required=False,
+        min_value=0,
+        label='Temps de préparation (minutes)',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        soumis_stock = cleaned.get('soumis_stock')
+        stock = cleaned.get('stock')
+        if soumis_stock and stock is None:
+            self.add_error('stock', 'Le produit étant soumis au stock, la quantité est requise.')
+        elif not soumis_stock:
+            cleaned['stock'] = 0
+
+        temps_defini = cleaned.get('temps_preparation_defini')
+        temps_preparation = cleaned.get('temps_preparation')
+        if temps_defini and not temps_preparation:
+            self.add_error('temps_preparation', 'Veuillez indiquer un temps de préparation.')
+        elif not temps_defini:
+            cleaned['temps_preparation'] = None
+
+        return cleaned
 
 
 class ClientForm(forms.ModelForm):
@@ -60,25 +109,71 @@ class AdresseLivraisonForm(forms.ModelForm):
             'client': forms.Select(attrs={'class': 'form-select'}),
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
             'adresse': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'latitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0000001'}),
-            'longitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0000001'}),
+            'latitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.00000000000000001'}),
+            'longitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.00000000000000001'}),
         }
+
+
+class AdresseLivraisonSelect(forms.Select):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        queryset = getattr(self.choices, 'queryset', None)
+        if queryset is not None and value:
+            raw = getattr(value, 'value', value)
+            try:
+                option['attrs']['data-client'] = queryset.get(pk=raw).client_id
+            except (ValueError, TypeError, queryset.model.DoesNotExist):
+                pass
+        return option
+
+
+class LigneCommandeForm(forms.ModelForm):
+    class Meta:
+        model = LigneCommande
+        fields = ['produit', 'quantite']
+        widgets = {
+            'produit': forms.Select(attrs={'class': 'form-select select2-produit'}),
+            'quantite': forms.NumberInput(attrs={'class': 'form-control ligne-quantite', 'min': '1'}),
+        }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if instance.prix_unitaire is None and instance.produit_id:
+            instance.prix_unitaire = instance.produit.prix
+        if commit:
+            instance.save()
+        return instance
 
 
 class CommandeForm(forms.ModelForm):
     class Meta:
         model = Commande
-        fields = ['numero', 'client', 'adresse_livraison', 'frais_livraison', 'total', 'commentaire', 'heure_souhaitee', 'statut']
+        fields = ['client', 'adresse_livraison', 'frais_livraison', 'a_livree', 'livreur', 'commentaire']
         widgets = {
-            'numero': forms.TextInput(attrs={'class': 'form-control'}),
-            'client': forms.Select(attrs={'class': 'form-select'}),
-            'adresse_livraison': forms.Select(attrs={'class': 'form-select'}),
-            'frais_livraison': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'total': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'client': forms.Select(attrs={'class': 'form-select select2-client'}),
+            'adresse_livraison': AdresseLivraisonSelect(attrs={'class': 'form-select select2-adresse'}),
+            'frais_livraison': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'a_livree': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'livreur': forms.Select(attrs={'class': 'form-select'}),
             'commentaire': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'heure_souhaitee': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'statut': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        if not cleaned.get('a_livree'):
+            cleaned['adresse_livraison'] = None
+            cleaned['frais_livraison'] = 0
+            cleaned['livreur'] = None
+        elif not cleaned.get('adresse_livraison'):
+            self.add_error('adresse_livraison', "La livraison étant activée, l'adresse de livraison est requise.")
+        return cleaned
+
+
+class CommandeUpdateForm(CommandeForm):
+    class Meta(CommandeForm.Meta):
+        fields = CommandeForm.Meta.fields + ['statut']
+        widgets = dict(CommandeForm.Meta.widgets)
+        widgets['statut'] = forms.Select(attrs={'class': 'form-select'})
 
 
 class LivreurForm(forms.ModelForm):

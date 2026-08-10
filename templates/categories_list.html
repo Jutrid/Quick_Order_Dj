@@ -34,7 +34,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total catégories</p>
-                <h4 class="card-title">12</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -52,8 +52,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Plats</p>
-                <h4 class="card-title">54</h4>
+                <p class="card-category">Catégories avec produits</p>
+                <h4 class="card-title">{{ avec_produits }}</h4>
             </div>
             </div>
         </div>
@@ -71,8 +71,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Boissons</p>
-                <h4 class="card-title">38</h4>
+                <p class="card-category">Catégories vides</p>
+                <h4 class="card-title">{{ sans_produits }}</h4>
             </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Produits total</p>
-                <h4 class="card-title">248</h4>
+                <h4 class="card-title">{{ total_produits }}</h4>
             </div>
             </div>
         </div>
@@ -138,66 +138,22 @@
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for categorie in categories %}
                           <tr>
-                            <td>Plats</td>
-                            <td>54</td>
+                            <td>{{ categorie.nom }}</td>
+                            <td>{{ categorie.nb_produits }}</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <a href="{% url 'categorie_update' categorie.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></a>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-categorie" data-url="{% url 'categorie_delete' categorie.pk %}" data-name="{{ categorie.nom }}" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>Boissons</td>
-                            <td>38</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="3" class="text-center text-muted py-4">Aucune catégorie pour le moment. Cliquez sur « Nouvelle catégorie » pour en ajouter une.</td>
                           </tr>
-                          <tr>
-                            <td>Fast Food</td>
-                            <td>42</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Desserts</td>
-                            <td>27</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Salades</td>
-                            <td>19</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Accompagnements</td>
-                            <td>15</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -206,4 +162,37 @@
               </div>
 
 
+<form id="form-delete-categorie" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    {% if error == 'protected' %}
+    swal({
+        title: 'Suppression impossible',
+        text: 'Cette catégorie est utilisée par des produits et ne peut pas être supprimée.',
+        icon: 'error',
+    });
+    {% endif %}
+    $(document).on('click', '.btn-delete-categorie', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        swal({
+            title: 'Supprimer cette catégorie ?',
+            text: 'La catégorie « ' + $btn.data('name') + ' » sera définitivement supprimée.',
+            icon: 'warning',
+            buttons: ['Annuler', 'Oui, supprimer'],
+            dangerMode: true,
+        }).then(function (willDelete) {
+            if (willDelete) {
+                $('#form-delete-categorie').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

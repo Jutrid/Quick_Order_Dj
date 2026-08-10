@@ -34,7 +34,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Total tailles</p>
-                <h4 class="card-title">4</h4>
+                <h4 class="card-title">{{ total }}</h4>
             </div>
             </div>
         </div>
@@ -52,8 +52,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Petites</p>
-                <h4 class="card-title">86</h4>
+                <p class="card-category">Tailles utilisées</p>
+                <h4 class="card-title">{{ avec_produits }}</h4>
             </div>
             </div>
         </div>
@@ -71,8 +71,8 @@
             </div>
             <div class="col-7 col-stats">
             <div class="numbers">
-                <p class="card-category">Moyennes</p>
-                <h4 class="card-title">74</h4>
+                <p class="card-category">Tailles vides</p>
+                <h4 class="card-title">{{ sans_produits }}</h4>
             </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Produits total</p>
-                <h4 class="card-title">248</h4>
+                <h4 class="card-title">{{ total_produits }}</h4>
             </div>
             </div>
         </div>
@@ -138,46 +138,22 @@
                           </tr>
                         </tfoot>
                         <tbody>
+                          {% for taille in tailles %}
                           <tr>
-                            <td>Petit</td>
-                            <td>86</td>
+                            <td>{{ taille.nom }}</td>
+                            <td>{{ taille.nb_produits }}</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
+                                <a href="{% url 'taille_update' taille.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></a>
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-taille" data-url="{% url 'taille_delete' taille.pk %}" data-name="{{ taille.nom }}" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
                           </tr>
+                          {% empty %}
                           <tr>
-                            <td>Moyen</td>
-                            <td>74</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
+                            <td colspan="3" class="text-center text-muted py-4">Aucune taille pour le moment. Cliquez sur « Nouvelle taille » pour en ajouter une.</td>
                           </tr>
-                          <tr>
-                            <td>Grand</td>
-                            <td>61</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Extra large</td>
-                            <td>27</td>
-                            <td>
-                              <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
-                              </div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -186,4 +162,37 @@
               </div>
 
 
+<form id="form-delete-taille" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    {% if error == 'protected' %}
+    swal({
+        title: 'Suppression impossible',
+        text: 'Cette taille est utilisée par des produits et ne peut pas être supprimée.',
+        icon: 'error',
+    });
+    {% endif %}
+    $(document).on('click', '.btn-delete-taille', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        swal({
+            title: 'Supprimer cette taille ?',
+            text: 'La taille « ' + $btn.data('name') + ' » sera définitivement supprimée.',
+            icon: 'warning',
+            buttons: ['Annuler', 'Oui, supprimer'],
+            dangerMode: true,
+        }).then(function (willDelete) {
+            if (willDelete) {
+                $('#form-delete-taille').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -57,11 +57,15 @@
                 </div>
 
                 <div class="border rounded p-3 bg-light" style="min-height: 420px;">
-                    <div class="text-center text-muted py-5">
-                        <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
-                        <h5>Aucune carte interactive n’est encore branchée</h5>
-                        <p class="mb-0">La liste des adresses ci-dessous permet déjà de visualiser les lieux et de les filtrer.</p>
-                    </div>
+                    {% if adresses_coords %}
+                        <div id="map" style="height: 420px; border-radius: 0.5rem;"></div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                            <h5>Aucune adresse avec coordonnées</h5>
+                            <p class="mb-0">Renseignez une latitude et une longitude lors de l'ajout d'une adresse pour la voir apparaître sur la carte.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -113,4 +117,37 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% if adresses_coords %}
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+<script src="{% static 'js/plugin/leaflet/leaflet.js' %}"></script>
+{{ adresses_coords|json_script:"adresses-data" }}
+<script>
+$(document).ready(function () {
+    var points = JSON.parse(document.getElementById('adresses-data').textContent);
+    var map = L.map('map');
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        detectRetina: true,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    var markers = [];
+    points.forEach(function (p) {
+        var marker = L.marker([p.lat, p.lon]).addTo(map);
+        marker.bindPopup('<strong>' + p.nom + '</strong><br>' + p.client + '<br>' + p.adresse);
+        markers.push(marker);
+    });
+
+    if (points.length === 1) {
+        map.setView([points[0].lat, points[0].lon], 15);
+    } else {
+        map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [30, 30] });
+    }
+});
+</script>
+{% endif %}
 {% endblock %}

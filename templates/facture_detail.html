@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -102,8 +103,8 @@
                         {% if ligne.note %}<br><small class="text-muted"><i class="icon-note"></i> {{ ligne.note }}</small>{% endif %}
                     </td>
                     <td class="text-center">{{ ligne.quantite }}</td>
-                    <td class="text-end">{{ ligne.prix_unitaire|floatformat:0 }} FCFA</td>
-                    <td class="text-end">{{ ligne.sous_total|floatformat:0 }} FCFA</td>
+                    <td class="text-end">{{ ligne.prix_unitaire|montant }}</td>
+                    <td class="text-end">{{ ligne.sous_total|montant }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -119,23 +120,23 @@
             <table class="table table-sm mb-3">
                 <tr>
                     <td class="text-muted">Sous-total</td>
-                    <td class="text-end">{{ facture.commande.total|floatformat:0 }} FCFA</td>
+                    <td class="text-end">{{ facture.commande.total|montant }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted">Frais de livraison</td>
-                    <td class="text-end">{{ facture.commande.frais_livraison|floatformat:0 }} FCFA</td>
+                    <td class="text-end">{{ facture.commande.frais_livraison|montant }}</td>
                 </tr>
                 <tr class="border-top">
                     <td class="fw-bold">Total à payer</td>
-                    <td class="text-end fw-bold fs-5 text-primary">{{ facture.montant|floatformat:0 }} FCFA</td>
+                    <td class="text-end fw-bold fs-5 text-primary">{{ facture.montant|montant }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted">Montant payé</td>
-                    <td class="text-end text-success">{{ facture.montant_paye|floatformat:0 }} FCFA</td>
+                    <td class="text-end text-success">{{ facture.montant_paye|montant }}</td>
                 </tr>
                 <tr>
                     <td class="fw-bold">Reste à payer</td>
-                    <td class="text-end fw-bold {% if facture.montant_restant > 0 %}text-danger{% endif %}">{{ facture.montant_restant|floatformat:0 }} FCFA</td>
+                    <td class="text-end fw-bold {% if facture.montant_restant > 0 %}text-danger{% endif %}">{{ facture.montant_restant|montant }}</td>
                 </tr>
             </table>
         </div>
@@ -163,7 +164,7 @@
                             <td>{{ paiement.date_paiement|date:"d/m/Y H:i" }}</td>
                             <td>{{ paiement.get_mode_paiement_display }}</td>
                             <td>{{ paiement.reference|default:"—" }}</td>
-                            <td class="text-end">{{ paiement.montant|floatformat:0 }} FCFA</td>
+                            <td class="text-end">{{ paiement.montant|montant }}</td>
                             <td>
                                 {% if paiement.statut == 'VALIDE' %}
                                     <span class="badge badge-success">Validé</span>

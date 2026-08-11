@@ -183,16 +183,16 @@
                                 <div class="card-body py-3">
                                     <div class="d-flex justify-content-between mb-1">
                                         <span>Sous-total produits</span>
-                                        <strong id="lignes-total">0 FCFA</strong>
+                                        <strong id="lignes-total">0 CDF</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-1">
                                         <span>Frais de livraison</span>
-                                        <strong id="frais-display">0 FCFA</strong>
+                                        <strong id="frais-display">0 CDF</strong>
                                     </div>
                                     <hr class="my-2">
                                     <div class="d-flex justify-content-between fs-5">
                                         <span>Total commande</span>
-                                        <strong id="commande-total">0 FCFA</strong>
+                                        <strong id="commande-total">0 CDF</strong>
                                     </div>
                                 </div>
                             </div>
@@ -231,8 +231,8 @@ $(document).ready(function () {
         });
     }
 
-    function formatFCFA(n) {
-        return n.toLocaleString('fr-FR') + ' FCFA';
+    function formatCDF(n) {
+        return n.toLocaleString('fr-FR') + ' CDF';
     }
 
     function updateTotalForms() {
@@ -263,16 +263,16 @@ $(document).ready(function () {
             var q = parseInt($row.find('.ligne-quantite').val(), 10) || 0;
             var prix = prices[pid] || 0;
             var sous = prix * q;
-            $row.find('.ligne-sous-total').text(formatFCFA(sous));
+            $row.find('.ligne-sous-total').text(formatCDF(sous));
             sousTotal += sous;
         });
         var frais = 0;
         if ($('#id_a_livree').is(':checked')) {
             frais = parseFloat($('#id_frais_livraison').val()) || 0;
         }
-        $('#lignes-total').text(formatFCFA(sousTotal));
-        $('#frais-display').text(formatFCFA(frais));
-        $('#commande-total').text(formatFCFA(sousTotal + frais));
+        $('#lignes-total').text(formatCDF(sousTotal));
+        $('#frais-display').text(formatCDF(frais));
+        $('#commande-total').text(formatCDF(sousTotal + frais));
     }
 
     function toggleLivraison() {

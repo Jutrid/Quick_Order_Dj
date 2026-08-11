@@ -501,7 +501,7 @@ class DetailPagesTests(TestCase):
         self.assertContains(response, 'Diop Moussa')
         self.assertContains(response, 'Pizza Margherita')
         self.assertContains(response, 'Sans oignons')
-        self.assertContains(response, '10000 FCFA')
+        self.assertContains(response, '10 000 CDF')
 
     def test_facture_detail_affiche_la_facture_professionnelle(self):
         response = self.client.get(reverse('facture_detail', args=[self.facture.pk]))
@@ -525,7 +525,7 @@ class DetailPagesTests(TestCase):
         self.assertContains(response, 'Pizza Margherita')
         self.assertContains(response, self.produit.reference)
         self.assertContains(response, 'Pizzas')
-        self.assertContains(response, '5000 FCFA')
+        self.assertContains(response, '5 000 CDF')
         self.assertContains(response, 'Total vendu')
 
     def test_client_detail_affiche_infos_adresses_et_commandes(self):

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -64,7 +65,7 @@
                         </tr>
                         <tr>
                             <th class="text-muted">Total dépensé</th>
-                            <td class="fw-bold">{{ total_depense|floatformat:0 }} FCFA</td>
+                            <td class="fw-bold">{{ total_depense|montant }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -126,7 +127,7 @@
                         <tr>
                             <td>{{ commande.numero }}</td>
                             <td>{{ commande.date_commande|date:"d/m/Y H:i" }}</td>
-                            <td>{{ commande.total|floatformat:0 }} FCFA</td>
+                            <td>{{ commande.total|montant }}</td>
                             <td>
                                 {% if commande.statut == 'LIVREE' %}
                                     <span class="badge badge-success">Livrée</span>

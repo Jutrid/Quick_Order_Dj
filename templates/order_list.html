@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -149,7 +150,7 @@
                             <td>{{ commande.numero }}</td>
                             <td>{{ commande.client.nom }} {{ commande.client.prenom }}</td>
                             <td>{{ commande.date_commande|date:"d/m/Y H:i" }}</td>
-                            <td>{{ commande.total }} FCFA</td>
+                            <td>{{ commande.total|montant }}</td>
                             <td>
                               {% if commande.statut == 'EN_ATTENTE' %}
                                 <span class="badge badge-warning">En attente</span>

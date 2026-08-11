@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -59,7 +60,7 @@
                                 </tr>
                                 <tr>
                                     <th class="text-muted">Prix</th>
-                                    <td class="fw-bold">{{ produit.prix|floatformat:0 }} FCFA</td>
+                                    <td class="fw-bold">{{ produit.prix|montant }}</td>
                                 </tr>
                                 <tr>
                                     <th class="text-muted">Disponible</th>

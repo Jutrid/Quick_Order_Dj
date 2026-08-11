@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -114,7 +115,7 @@
                         </tr>
                         <tr>
                             <th class="text-muted">Total</th>
-                            <td class="fw-bold">{{ commande.total|floatformat:0 }} FCFA</td>
+                            <td class="fw-bold">{{ commande.total|montant }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -146,8 +147,8 @@
                                     {% if ligne.note %}<br><small class="text-muted"><i class="icon-note"></i> {{ ligne.note }}</small>{% endif %}
                                 </td>
                                 <td class="text-center">{{ ligne.quantite }}</td>
-                                <td class="text-end">{{ ligne.prix_unitaire|floatformat:0 }}</td>
-                                <td class="text-end">{{ ligne.sous_total|floatformat:0 }}</td>
+                                <td class="text-end">{{ ligne.prix_unitaire|sep }}</td>
+                                <td class="text-end">{{ ligne.sous_total|sep }}</td>
                             </tr>
                             {% empty %}
                             <tr>
@@ -158,15 +159,15 @@
                         <tfoot>
                             <tr>
                                 <td colspan="3" class="text-end text-muted">Sous-total</td>
-                                <td class="text-end">{{ commande.total|floatformat:0 }}</td>
+                                <td class="text-end">{{ commande.total|sep }}</td>
                             </tr>
                             <tr>
                                 <td colspan="3" class="text-end text-muted">Frais de livraison</td>
-                                <td class="text-end">{{ commande.frais_livraison|floatformat:0 }}</td>
+                                <td class="text-end">{{ commande.frais_livraison|sep }}</td>
                             </tr>
                             <tr>
                                 <td colspan="3" class="text-end fw-bold">Total</td>
-                                <td class="text-end fw-bold">{{ commande.total|floatformat:0 }} FCFA</td>
+                                <td class="text-end fw-bold">{{ commande.total|montant }}</td>
                             </tr>
                         </tfoot>
                     </table>

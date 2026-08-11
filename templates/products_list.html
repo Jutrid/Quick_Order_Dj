@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -155,7 +156,7 @@
                             <td>{{ produit.reference }}</td>
                             <td>{{ produit.nom }}</td>
                             <td>{{ produit.categorie.nom }}</td>
-                            <td>{{ produit.prix }} FCFA</td>
+                            <td>{{ produit.prix|montant }}</td>
                             <td>
                               {% if produit.soumis_stock %}
                                 <span class="badge badge-success">Oui</span>

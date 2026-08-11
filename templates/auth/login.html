@@ -89,8 +89,8 @@
             <div class="form-text">Votre mot de passe reste strictement confidentiel.</div>
           </div>
 
-          {% if form and form.errors %}
-            <div class="alert alert-danger py-2">Identifiants invalides</div>
+          {% if error %}
+            <div class="alert alert-danger py-2" role="alert">Nom d’utilisateur ou mot de passe incorrect.</div>
           {% endif %}
 
           <button class="btn btn-primary w-100 mb-3" id="loginBtn" type="submit">

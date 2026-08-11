@@ -21,29 +21,20 @@ appartient à une seule catégorie.
 
 ------------------------------------------------------------------------
 
-# 2. TailleProduit
-
-Cette classe permet de gérer les différentes tailles proposées.
-
-Exemples : - Petite - Moyenne - Grande - Familiale
-
-Une taille peut être utilisée par plusieurs produits.
-
-------------------------------------------------------------------------
-
-# 3. Produit
+# 2. Produit
 
 La classe **Produit** représente les articles vendus.
 
-Elle contient notamment : - une référence unique ; - le nom du produit
-; - une description ; - son prix ; - une image ; - son temps de
-préparation ; - son état de disponibilité.
+Elle contient notamment : - une référence unique (générée
+automatiquement) ; - le nom du produit ; - une description ; - son prix
+; - une image ; - son temps de préparation ; - son état de disponibilité
+; - une gestion de stock optionnelle.
 
-Chaque produit est associé à une catégorie et à une taille.
+Chaque produit est associé à une catégorie.
 
 ------------------------------------------------------------------------
 
-# 4. Client
+# 3. Client
 
 Cette classe représente les clients.
 
@@ -55,7 +46,7 @@ de livraison.
 
 ------------------------------------------------------------------------
 
-# 5. AdresseLivraison
+# 4. AdresseLivraison
 
 Cette entité permet à un client d'enregistrer plusieurs adresses.
 
@@ -66,7 +57,7 @@ longitude).
 
 ------------------------------------------------------------------------
 
-# 6. Commande
+# 5. Commande
 
 La commande est l'élément central de l'application.
 
@@ -82,7 +73,7 @@ Une commande possède plusieurs lignes de commande.
 
 ------------------------------------------------------------------------
 
-# 7. LigneCommande
+# 6. LigneCommande
 
 Chaque ligne correspond à un produit commandé.
 
@@ -93,7 +84,7 @@ Le sous-total est calculé automatiquement.
 
 ------------------------------------------------------------------------
 
-# 8. Facture
+# 7. Facture
 
 Une facture est générée pour chaque commande.
 
@@ -104,7 +95,7 @@ Relation : - une commande possède une seule facture.
 
 ------------------------------------------------------------------------
 
-# 9. Paiement
+# 8. Paiement
 
 Une facture peut recevoir un ou plusieurs paiements.
 
@@ -115,7 +106,7 @@ Chaque paiement possède un montant, une référence et un statut.
 
 ------------------------------------------------------------------------
 
-# 10. Livreur
+# 9. Livreur
 
 Cette classe représente les personnes chargées de livrer les commandes.
 
@@ -124,7 +115,7 @@ Informations : - nom ; - téléphone ; - photo ; - plaque de la moto ; -
 
 ------------------------------------------------------------------------
 
-# 11. Livraison
+# 10. Livraison
 
 Une livraison est associée à une commande.
 
@@ -139,7 +130,6 @@ Les statuts possibles sont : - En attente - En route - Livrée - Annulée
 # Relations entre les classes
 
 -   Une **Catégorie** possède plusieurs **Produits**.
--   Une **TailleProduit** peut être associée à plusieurs **Produits**.
 -   Un **Client** possède plusieurs **Adresses de livraison**.
 -   Un **Client** peut effectuer plusieurs **Commandes**.
 -   Une **Commande** contient plusieurs **Lignes de commande**.

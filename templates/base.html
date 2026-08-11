@@ -129,13 +129,13 @@
                   <p>Commandes</p>
                 </a>
               </li>
-              <li class="nav-item {% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'tailles_list' %}active{% endif %}">
-                <a data-bs-toggle="collapse" href="#sidebarLayouts" aria-expanded="{% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'tailles_list' %}true{% else %}false{% endif %}">
+              <li class="nav-item {% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'mouvements_stock_list' %}active{% endif %}">
+                <a data-bs-toggle="collapse" href="#sidebarLayouts" aria-expanded="{% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'mouvements_stock_list' %}true{% else %}false{% endif %}">
                   <i class="far fa-list-alt"></i>
                   <p>Produits</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse {% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'tailles_list' %}show{% endif %}" id="sidebarLayouts">
+                <div class="collapse {% if request.resolver_match.url_name == 'products_list' or request.resolver_match.url_name == 'categories_list' or request.resolver_match.url_name == 'mouvements_stock_list' %}show{% endif %}" id="sidebarLayouts">
                   <ul class="nav nav-collapse">
                     <li>
                       <a href="{% url 'products_list' %}" class="{% if request.resolver_match.url_name == 'products_list' %}active{% endif %}">
@@ -148,8 +148,8 @@
                       </a>
                     </li>
                     <li>
-                      <a href="{% url 'tailles_list' %}" class="{% if request.resolver_match.url_name == 'tailles_list' %}active{% endif %}">
-                        <span class="sub-item">Taille du produit</span>
+                      <a href="{% url 'mouvements_stock_list' %}" class="{% if request.resolver_match.url_name == 'mouvements_stock_list' %}active{% endif %}">
+                        <span class="sub-item">Mouvements de stock</span>
                       </a>
                     </li>
                   </ul>

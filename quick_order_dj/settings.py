@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-_ch+cj9l912h-e5v%lrvfhtc$&3&b6xlypi@vyn%!_!w^m9-ii
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -76,9 +76,13 @@ WSGI_APPLICATION = 'quick_order_dj.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "Quick_Order_DB",
+        "USER": "postgres",
+        "PASSWORD": "Jun120101",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 

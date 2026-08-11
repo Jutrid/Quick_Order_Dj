@@ -35,7 +35,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-pie-chart text-warning"></i>
+                <i class="fas fa-file-invoice text-warning"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -54,7 +54,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-wallet text-success"></i>
+                <i class="fas fa-check-circle text-success"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -73,7 +73,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-close text-danger"></i>
+                <i class="fas fa-times-circle text-danger"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -92,7 +92,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-credit-card text-primary"></i>
+                <i class="fas fa-coins text-primary"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -161,6 +161,7 @@
                             </td>
                             <td>
                               <div class="form-button-action">
+                                <a href="{% url 'facture_detail' facture.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Voir la facture"><i class="icon-eye"></i></a>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-success btn-payer-facture" data-url="{% url 'facture_paiement' facture.pk %}" data-name="{{ facture.numero }}" data-reste="{{ facture.montant_restant|floatformat:2 }}" data-original-title="Payer"><i class="icon-wallet"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-facture" data-url="{% url 'facture_delete' facture.pk %}" data-name="{{ facture.numero }}" data-original-title="Supprimer"><i class="icon-trash"></i></button>
                               </div>

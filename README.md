@@ -48,7 +48,7 @@ Construite avec **Django**, avec un front-end responsive (Bootstrap 5, jQuery, S
 - États : Disponible, En livraison, Inactif.
 
 ### Produits & catalogue
-- Catégories, tailles et produits (référence, prix, image, gestion de stock optionnelle, temps de préparation).
+- Catégories et produits (référence auto-générée, prix, image, gestion de stock optionnelle, temps de préparation).
 
 ### Clients & adresses
 - Gestion des clients et de leurs adresses de livraison, avec **latitude / longitude** affichées sur une carte Leaflet, filtrage par client et recherche.
@@ -87,7 +87,7 @@ Construite avec **Django**, avec un front-end responsive (Bootstrap 5, jQuery, S
 
 ### Modèles principaux (`order_app/models.py`)
 
-- `Categorie`, `TailleProduit`, `Produit`
+- `Categorie`, `Produit`
 - `Client`, `AdresseLivraison`
 - `Commande` (FK `Client`, FK `AdresseLivraison`, FK `Livreur`, `a_livree`), `LigneCommande`
 - `Facture` (OneToOne `Commande`), `Paiement` (FK `Facture`)
@@ -136,7 +136,7 @@ L'application est alors accessible sur [http://127.0.0.1:8000/](http://127.0.0.1
 ## Utilisation
 
 1. **Se connecter** sur la page d'accueil (ou s'inscrire via `/register/`).
-2. **Paramétrer le catalogue** : ajouter des catégories, des tailles puis des produits (menu **Products**).
+2. **Paramétrer le catalogue** : ajouter des catégories puis des produits (menu **Products**). La référence de chaque produit est générée automatiquement (`PROD-xxxxxx`).
 3. **Ajouter des clients** et leurs adresses de livraison.
 4. **Créer une commande** : choisir le client, ajouter les produits (lignes dynamiques), cocher **« à livrer »** si nécessaire (adresse, livreur, frais).
 5. **Faire progresser la commande** : passer au statut **Prête** → une **facture** est générée automatiquement (et une **livraison** si la commande est à livrer).

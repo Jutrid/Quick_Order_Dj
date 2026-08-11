@@ -1,8 +1,8 @@
 from django.contrib import admin
 from .models import (
     Categorie,
-    TailleProduit,
     Produit,
+    MouvementStock,
     Client,
     AdresseLivraison,
     Commande,
@@ -44,16 +44,6 @@ class CategorieAdmin(admin.ModelAdmin):
 
 
 # ======================================================
-# TAILLE PRODUIT
-# ======================================================
-
-@admin.register(TailleProduit)
-class TailleProduitAdmin(admin.ModelAdmin):
-    list_display = ("id", "nom")
-    search_fields = ("nom",)
-
-
-# ======================================================
 # PRODUIT
 # ======================================================
 
@@ -63,7 +53,6 @@ class ProduitAdmin(admin.ModelAdmin):
         "reference",
         "nom",
         "categorie",
-        "taille",
         "prix",
         "disponible",
         "soumis_stock",
@@ -73,7 +62,6 @@ class ProduitAdmin(admin.ModelAdmin):
 
     list_filter = (
         "categorie",
-        "taille",
         "disponible",
         "soumis_stock",
     )
@@ -84,6 +72,32 @@ class ProduitAdmin(admin.ModelAdmin):
     )
 
     ordering = ("nom",)
+
+
+# ======================================================
+# MOUVEMENT DE STOCK
+# ======================================================
+
+@admin.register(MouvementStock)
+class MouvementStockAdmin(admin.ModelAdmin):
+    list_display = (
+        "produit",
+        "type_mouvement",
+        "quantite",
+        "date",
+    )
+
+    list_filter = (
+        "type_mouvement",
+        "date",
+    )
+
+    search_fields = (
+        "produit__nom",
+        "description",
+    )
+
+    readonly_fields = ("date",)
 
 
 # ======================================================

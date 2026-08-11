@@ -28,7 +28,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-pie-chart text-warning"></i>
+                <i class="fas fa-box text-warning"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-wallet text-success"></i>
+                <i class="fas fa-check-circle text-success"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -66,7 +66,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-close text-danger"></i>
+                <i class="fas fa-times-circle text-danger"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -85,7 +85,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-social-twitter text-primary"></i>
+                <i class="fas fa-th-large text-primary"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -128,7 +128,6 @@
                             <th>Référence</th>
                             <th>Nom</th>
                             <th>Catégorie</th>
-                            <th>Taille</th>
                             <th>Prix</th>
                             <th>Soumis au stock</th>
                             <th>Stock</th>
@@ -142,7 +141,6 @@
                             <th>Référence</th>
                             <th>Nom</th>
                             <th>Catégorie</th>
-                            <th>Taille</th>
                             <th>Prix</th>
                             <th>Soumis au stock</th>
                             <th>Stock</th>
@@ -157,7 +155,6 @@
                             <td>{{ produit.reference }}</td>
                             <td>{{ produit.nom }}</td>
                             <td>{{ produit.categorie.nom }}</td>
-                            <td>{{ produit.taille.nom }}</td>
                             <td>{{ produit.prix }} FCFA</td>
                             <td>
                               {% if produit.soumis_stock %}
@@ -189,7 +186,11 @@
                             </td>
                             <td>
                               <div class="form-button-action">
+                                <a href="{% url 'produit_detail' produit.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-success btn-lg" data-original-title="Détails du produit"><i class="icon-eye"></i></a>
                                 <a href="{% url 'produit_update' produit.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></a>
+                                {% if produit.soumis_stock %}
+                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-warning btn-lg btn-mouvement-stock" data-url="{% url 'produit_stock_mouvement' produit.pk %}" data-name="{{ produit.nom }}" data-stock="{{ produit.stock }}" data-original-title="Mettre à jour le stock"><i class="fa fa-warehouse"></i></button>
+                                {% endif %}
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-produit" data-url="{% url 'produit_delete' produit.pk %}" data-name="{{ produit.nom }}" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>
                             </td>
@@ -211,6 +212,13 @@
   {% csrf_token %}
 </form>
 
+<form id="form-mouvement-stock" method="post" style="display: none;">
+  {% csrf_token %}
+  <input type="hidden" name="type_mouvement" value="">
+  <input type="hidden" name="quantite" value="">
+  <input type="hidden" name="description" value="">
+</form>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -228,6 +236,49 @@ $(document).ready(function () {
         }).then(function (willDelete) {
             if (willDelete) {
                 $('#form-delete-produit').attr('action', $btn.data('url')).submit();
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-mouvement-stock', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var html = '<div class="text-start">' +
+            '<label for="swal-type-mouvement" style="display:block;margin-bottom:.35rem;font-size:14px;color:#555;">Type de mouvement</label>' +
+            '<select id="swal-type-mouvement" class="form-select" style="width:100%;padding:.5rem .75rem;border:1px solid #ced4da;border-radius:.25rem;">' +
+            '<option value="ENTREE">Entrée (ajout de stock)</option>' +
+            '<option value="SORTIE">Sortie (retrait de stock)</option>' +
+            '</select>' +
+            '<label for="swal-quantite" style="display:block;margin:.75rem 0 .35rem;font-size:14px;color:#555;">Quantité</label>' +
+            '<input type="number" id="swal-quantite" min="1" step="1" class="form-control" placeholder="Quantité" style="padding:.5rem .75rem;border:1px solid #ced4da;border-radius:.25rem;" />' +
+            '<label for="swal-description" style="display:block;margin:.75rem 0 .35rem;font-size:14px;color:#555;">Description (motif)</label>' +
+            '<textarea id="swal-description" rows="2" class="form-control" placeholder="Ex : Réception fournisseur, Casse, Réapprovisionnement..." style="padding:.5rem .75rem;border:1px solid #ced4da;border-radius:.25rem;"></textarea>' +
+            '</div>';
+        swal({
+            title: 'Mouvement de stock',
+            text: 'Produit « ' + $btn.data('name') + ' » — stock actuel : ' + $btn.data('stock'),
+            icon: 'info',
+            content: { element: 'div', attributes: { innerHTML: html } },
+            buttons: ['Annuler', 'Enregistrer'],
+        }).then(function (willSave) {
+            if (willSave) {
+                var typeMouvement = $('#swal-type-mouvement').val();
+                var quantite = $('#swal-quantite').val();
+                var description = $('#swal-description').val();
+                if (!typeMouvement || !quantite || parseInt(quantite, 10) <= 0) {
+                    swal({
+                        title: 'Champs invalides',
+                        text: 'Veuillez saisir une quantité valide (supérieure à 0).',
+                        icon: 'error',
+                        button: 'Fermer',
+                    });
+                    return;
+                }
+                var $form = $('#form-mouvement-stock');
+                $form.find('input[name="type_mouvement"]').val(typeMouvement);
+                $form.find('input[name="quantite"]').val(quantite);
+                $form.find('input[name="description"]').val(description || '');
+                $form.attr('action', $btn.data('url')).submit();
             }
         });
     });

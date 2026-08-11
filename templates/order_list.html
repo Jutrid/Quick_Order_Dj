@@ -28,7 +28,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-pie-chart text-warning"></i>
+                <i class="fas fa-shopping-cart text-warning"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-wallet text-success"></i>
+                <i class="fas fa-clock text-success"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -66,7 +66,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-close text-danger"></i>
+                <i class="fas fa-utensils text-info"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -85,7 +85,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-social-twitter text-primary"></i>
+                <i class="fas fa-check-circle text-primary"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -167,6 +167,7 @@
                             </td>
                             <td>
                               <div class="form-button-action">
+                                <a href="{% url 'commande_detail' commande.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-success btn-lg" data-original-title="Détails de la commande"><i class="icon-eye"></i></a>
                                 <a href="{% url 'commande_update' commande.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="icon-pencil"></i></a>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-info btn-statut-commande" data-url="{% url 'commande_statut' commande.pk %}" data-name="{{ commande.numero }}" data-statut="{{ commande.statut }}" data-original-title="Changer le statut"><i class="icon-options"></i></button>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-commande" data-url="{% url 'commande_delete' commande.pk %}" data-name="{{ commande.numero }}" data-original-title="Supprimer"><i class="icon-trash"></i></button>

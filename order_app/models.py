@@ -1,5 +1,6 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import F, Sum
+from django.db.models.functions import Greatest
 
 
 # =====================================================
@@ -19,17 +20,6 @@ class Categorie(models.Model):
 
 
 # =====================================================
-# TAILLE PRODUIT
-# =====================================================
-
-class TailleProduit(models.Model):
-    nom = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.nom
-
-
-# =====================================================
 # PRODUIT
 # =====================================================
 
@@ -40,13 +30,14 @@ class Produit(models.Model):
         related_name="produits"
     )
 
-    taille = models.ForeignKey(
-        TailleProduit,
-        on_delete=models.PROTECT,
-        related_name="produits"
+    reference = models.CharField(
+        max_length=30,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="Générée automatiquement (PROD-xxxxxx)"
     )
 
-    reference = models.CharField(max_length=30, unique=True)
     nom = models.CharField(max_length=150)
     description = models.TextField(blank=True)
 
@@ -86,6 +77,52 @@ class Produit(models.Model):
 
     def __str__(self):
         return self.nom
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.reference:
+            self.reference = f"PROD-{self.pk:06d}"
+            super().save(update_fields=["reference"])
+
+
+# =====================================================
+# MOUVEMENT DE STOCK
+# =====================================================
+
+class MouvementStock(models.Model):
+
+    class TypeMouvement(models.TextChoices):
+        ENTREE = "ENTREE", "Entrée"
+        SORTIE = "SORTIE", "Sortie"
+
+    produit = models.ForeignKey(
+        Produit,
+        on_delete=models.CASCADE,
+        related_name="mouvements"
+    )
+
+    date = models.DateTimeField(auto_now_add=True)
+
+    type_mouvement = models.CharField(
+        max_length=10,
+        choices=TypeMouvement.choices
+    )
+
+    quantite = models.PositiveIntegerField()
+
+    description = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Ex : Réception fournisseur, Casse, Réapprovisionnement..."
+    )
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "Mouvement de stock"
+        verbose_name_plural = "Mouvements de stock"
+
+    def __str__(self):
+        return f"{self.produit.nom} — {self.get_type_mouvement_display()} — {self.quantite}"
 
 
 # =====================================================
@@ -212,6 +249,32 @@ class Commande(models.Model):
 
     def __str__(self):
         return self.numero
+
+    def diminuer_stock(self):
+        for ligne in self.lignes.select_related('produit'):
+            if ligne.produit.soumis_stock:
+                Produit.objects.filter(pk=ligne.produit_id).update(
+                    stock=Greatest(F('stock') - ligne.quantite, 0)
+                )
+                MouvementStock.objects.create(
+                    produit_id=ligne.produit_id,
+                    type_mouvement=MouvementStock.TypeMouvement.SORTIE,
+                    quantite=ligne.quantite,
+                    description=f"Commande {self.numero}",
+                )
+
+    def rendre_stock(self):
+        for ligne in self.lignes.select_related('produit'):
+            if ligne.produit.soumis_stock:
+                Produit.objects.filter(pk=ligne.produit_id).update(
+                    stock=F('stock') + ligne.quantite
+                )
+                MouvementStock.objects.create(
+                    produit_id=ligne.produit_id,
+                    type_mouvement=MouvementStock.TypeMouvement.ENTREE,
+                    quantite=ligne.quantite,
+                    description=f"Retour commande {self.numero}",
+                )
 
 
 # =====================================================

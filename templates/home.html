@@ -8,8 +8,7 @@
     <h6 class="op-7 mb-2">Gestion des commandes, livraisons, factures et stock</h6>
   </div>
   <div class="ms-md-auto py-2 py-md-0">
-    <a href="#" class="btn btn-label-info btn-round me-2">Rapports</a>
-    <a href="#" class="btn btn-primary btn-round">Nouvelle commande</a>
+    <a href="{% url 'commande_create' %}" class="btn btn-primary btn-round">Nouvelle commande</a>
   </div>
 </div>
 
@@ -26,7 +25,7 @@
           <div class="col col-stats ms-3 ms-sm-0">
             <div class="numbers">
               <p class="card-category">Commandes</p>
-              <h4 class="card-title">248</h4>
+              <h4 class="card-title">{{ nb_commandes }}</h4>
             </div>
           </div>
         </div>
@@ -46,7 +45,7 @@
           <div class="col col-stats ms-3 ms-sm-0">
             <div class="numbers">
               <p class="card-category">Livraisons</p>
-              <h4 class="card-title">186</h4>
+              <h4 class="card-title">{{ nb_livraisons }}</h4>
             </div>
           </div>
         </div>
@@ -66,7 +65,7 @@
           <div class="col col-stats ms-3 ms-sm-0">
             <div class="numbers">
               <p class="card-category">Factures</p>
-              <h4 class="card-title">94</h4>
+              <h4 class="card-title">{{ nb_factures }}</h4>
             </div>
           </div>
         </div>
@@ -85,8 +84,8 @@
           </div>
           <div class="col col-stats ms-3 ms-sm-0">
             <div class="numbers">
-              <p class="card-category">Stock</p>
-              <h4 class="card-title">1 240</h4>
+              <p class="card-category">Articles en stock</p>
+              <h4 class="card-title">{{ stock_total }}</h4>
             </div>
           </div>
         </div>
@@ -100,10 +99,7 @@
     <div class="card card-round">
       <div class="card-header">
         <div class="card-head-row">
-          <div class="card-title">Évolution des livraisons</div>
-          <div class="card-tools">
-            <a href="#" class="btn btn-label-success btn-round btn-sm me-2">Exporter</a>
-          </div>
+          <div class="card-title">Évolution des commandes et des livraisons (6 derniers mois)</div>
         </div>
       </div>
       <div class="card-body">
@@ -117,9 +113,6 @@
       <div class="card-header">
         <div class="card-head-row">
           <div class="card-title">Activités récentes</div>
-          <div class="card-tools">
-            <a href="#" class="btn btn-label-success btn-round btn-sm me-2">Exporter</a>
-          </div>
         </div>
       </div>
       <div class="card-body">
@@ -134,24 +127,18 @@
               </tr>
             </thead>
             <tbody>
+              {% for activite in activites %}
               <tr>
-                <td>#CMD-1024</td>
-                <td>Commande</td>
-                <td><span class="badge badge-success">Livrée</span></td>
-                <td>Amine K.</td>
+                <td>{{ activite.ref }}</td>
+                <td>{{ activite.type }}</td>
+                <td><span class="badge {{ activite.badge }}">{{ activite.statut }}</span></td>
+                <td>{{ activite.client }}</td>
               </tr>
+              {% empty %}
               <tr>
-                <td>#LVR-205</td>
-                <td>Livraison</td>
-                <td><span class="badge badge-warning">En cours</span></td>
-                <td>Sarah B.</td>
+                <td colspan="4" class="text-center text-muted py-4">Aucune activité pour le moment.</td>
               </tr>
-              <tr>
-                <td>#FAC-340</td>
-                <td>Facture</td>
-                <td><span class="badge badge-info">Payée</span></td>
-                <td>Youssef M.</td>
-              </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
@@ -167,13 +154,13 @@
       <div class="card-body">
         <ul class="list-group list-group-flush">
           <li class="list-group-item d-flex justify-content-between">
-            <span>Livraisons en retard</span><strong>7</strong>
+            <span>Livraisons en attente</span><strong>{{ livraisons_en_attente }}</strong>
           </li>
           <li class="list-group-item d-flex justify-content-between">
-            <span>Produits à réapprovisionner</span><strong>12</strong>
+            <span>Produits à réapprovisionner</span><strong>{{ produits_a_reapprovisionner }}</strong>
           </li>
           <li class="list-group-item d-flex justify-content-between">
-            <span>Factures impayées</span><strong>3</strong>
+            <span>Factures impayées</span><strong>{{ factures_impayees }}</strong>
           </li>
         </ul>
       </div>
@@ -184,20 +171,36 @@
 
 {% block extra_js %}
 <script src="{% static 'js/plugin/chart.js/chart.min.js' %}"></script>
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_commandes|json_script:"chart-commandes" }}
+{{ chart_livraisons|json_script:"chart-livraisons" }}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('lineChart');
     if (!ctx) return;
 
+    const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+    const commandes = JSON.parse(document.getElementById('chart-commandes').textContent);
+    const livraisons = JSON.parse(document.getElementById('chart-livraisons').textContent);
+
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil'],
+        labels: labels,
         datasets: [{
-          label: 'Livraisons réalisées',
-          data: [45, 60, 72, 58, 81, 95, 110],
+          label: 'Commandes',
+          data: commandes,
           borderColor: '#1572E8',
           backgroundColor: 'rgba(21, 114, 232, 0.15)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointHoverRadius: 5
+        }, {
+          label: 'Livraisons livrées',
+          data: livraisons,
+          borderColor: '#31CE36',
+          backgroundColor: 'rgba(49, 206, 54, 0.15)',
           fill: true,
           tension: 0.35,
           pointRadius: 4,
@@ -208,7 +211,7 @@
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: true, position: 'top' }
         },
         scales: {
           y: {

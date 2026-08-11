@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Détail du client</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'clients_list' %}">Liste des clients</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">{{ client.nom }} {{ client.prenom }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <a href="{% url 'clients_list' %}" class="btn btn-outline-secondary btn-round"><i class="icon-arrow-left me-1"></i> Retour aux clients</a>
+    <div class="ms-md-auto py-2 py-md-0">
+        <a href="{% url 'client_update' client.pk %}" class="btn btn-primary btn-round"><i class="icon-pencil me-1"></i> Modifier</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">{{ client.nom }} {{ client.prenom }}</h4>
+                <i class="icon-user text-primary" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped align-middle mb-0">
+                    <tbody>
+                        <tr>
+                            <th style="width: 40%;" class="text-muted">Nom</th>
+                            <td>{{ client.nom }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Prénom</th>
+                            <td>{{ client.prenom|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Téléphone</th>
+                            <td>{{ client.telephone }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Email</th>
+                            <td>{{ client.email|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Nombre de commandes</th>
+                            <td>{{ nb_commandes }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Total dépensé</th>
+                            <td class="fw-bold">{{ total_depense|floatformat:0 }} FCFA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="card-title mb-0"><i class="icon-location-pin me-1"></i> Adresses de livraison</h4>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for adresse in client.adresses.all %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ adresse.nom }}</strong>
+                        </div>
+                        <div class="text-muted">{{ adresse.adresse }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted py-4">Aucune adresse enregistrée.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Historique des commandes</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="multi-filter-select" class="display table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Numéro</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>Numéro</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for commande in commandes %}
+                        <tr>
+                            <td>{{ commande.numero }}</td>
+                            <td>{{ commande.date_commande|date:"d/m/Y H:i" }}</td>
+                            <td>{{ commande.total|floatformat:0 }} FCFA</td>
+                            <td>
+                                {% if commande.statut == 'LIVREE' %}
+                                    <span class="badge badge-success">Livrée</span>
+                                {% elif commande.statut == 'EN_LIVRAISON' %}
+                                    <span class="badge badge-info">En livraison</span>
+                                {% elif commande.statut == 'PRETE' %}
+                                    <span class="badge badge-primary">Prête</span>
+                                {% elif commande.statut == 'EN_PREPARATION' %}
+                                    <span class="badge badge-info">En préparation</span>
+                                {% elif commande.statut == 'ANNULEE' %}
+                                    <span class="badge badge-danger">Annulée</span>
+                                {% else %}
+                                    <span class="badge badge-warning">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="form-button-action">
+                                    <a href="{% url 'commande_detail' commande.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Détails de la commande"><i class="icon-eye"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Aucune commande pour ce client.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

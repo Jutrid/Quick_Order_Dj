@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from .models import AdresseLivraison, Categorie, Client, Commande, Facture, LigneCommande, Livreur, Paiement, Produit, TailleProduit
+from .models import AdresseLivraison, Categorie, Client, Commande, Facture, LigneCommande, Livreur, Paiement, Produit
 
 
 class CategorieForm(forms.ModelForm):
@@ -14,22 +14,11 @@ class CategorieForm(forms.ModelForm):
         }
 
 
-class TailleProduitForm(forms.ModelForm):
-    class Meta:
-        model = TailleProduit
-        fields = ['nom']
-        widgets = {
-            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex : Grande'})
-        }
-
-
 class ProduitForm(forms.ModelForm):
     class Meta:
         model = Produit
         fields = [
             'categorie',
-            'taille',
-            'reference',
             'nom',
             'description',
             'prix',
@@ -42,8 +31,6 @@ class ProduitForm(forms.ModelForm):
         ]
         widgets = {
             'categorie': forms.Select(attrs={'class': 'form-select'}),
-            'taille': forms.Select(attrs={'class': 'form-select'}),
-            'reference': forms.TextInput(attrs={'class': 'form-control'}),
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'prix': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),

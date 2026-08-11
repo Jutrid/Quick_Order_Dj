@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Mouvements de stock</h3>
+    <ul class="breadcrumbs mb-3">
+    <li class="nav-home">
+        <a href="{% url "home" %}">
+        <i class="icon-home"></i>
+        </a>
+    </li>
+    <li class="separator">
+        <i class="icon-arrow-right"></i>
+    </li>
+    <li class="nav-item">
+        <a href="#">Produits</a>
+    </li>
+    <li class="separator">
+        <i class="icon-arrow-right"></i>
+    </li>
+    <li class="nav-item">
+        <a href="#">Mouvements de stock</a>
+    </li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+        <div class="card-body">
+        <div class="row">
+            <div class="col-5">
+            <div class="icon-big text-center">
+                <i class="icon-refresh text-primary"></i>
+            </div>
+            </div>
+            <div class="col-7 col-stats">
+            <div class="numbers">
+                <p class="card-category">Total mouvements</p>
+                <h4 class="card-title">{{ total }}</h4>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+        <div class="card-body">
+        <div class="row">
+            <div class="col-5">
+            <div class="icon-big text-center">
+                <i class="icon-arrow-down-circle text-success"></i>
+            </div>
+            </div>
+            <div class="col-7 col-stats">
+            <div class="numbers">
+                <p class="card-category">Entrées</p>
+                <h4 class="card-title">{{ entrees }}</h4>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+        <div class="card-body">
+        <div class="row">
+            <div class="col-5">
+            <div class="icon-big text-center">
+                <i class="icon-arrow-up-circle text-danger"></i>
+            </div>
+            </div>
+            <div class="col-7 col-stats">
+            <div class="numbers">
+                <p class="card-category">Sorties</p>
+                <h4 class="card-title">{{ sorties }}</h4>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-round">
+        <div class="card-body">
+        <div class="row">
+            <div class="col-5">
+            <div class="icon-big text-center">
+                <i class="icon-box text-warning"></i>
+            </div>
+            </div>
+            <div class="col-7 col-stats">
+            <div class="numbers">
+                <p class="card-category">Produits sous stock</p>
+                <h4 class="card-title">{{ produits_stock }}</h4>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Historique des mouvements</h4>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table
+                        id="multi-filter-select"
+                        class="display table table-striped table-hover"
+                      >
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Produit</th>
+                            <th>Type</th>
+                            <th>Quantité</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <th>Date</th>
+                            <th>Produit</th>
+                            <th>Type</th>
+                            <th>Quantité</th>
+                            <th>Description</th>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          {% for mvt in mouvements %}
+                          <tr>
+                            <td>{{ mvt.date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ mvt.produit.nom }} <span class="text-muted">({{ mvt.produit.reference }})</span></td>
+                            <td>
+                              {% if mvt.type_mouvement == 'ENTREE' %}
+                                <span class="badge badge-success">Entrée</span>
+                              {% else %}
+                                <span class="badge badge-danger">Sortie</span>
+                              {% endif %}
+                            </td>
+                            <td>{{ mvt.quantite }}</td>
+                            <td>{{ mvt.description|default:"—" }}</td>
+                          </tr>
+                          {% empty %}
+                          <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Aucun mouvement de stock pour le moment. Utilisez le bouton stock d'un produit pour enregistrer une entrée ou une sortie.</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+{% endblock %}

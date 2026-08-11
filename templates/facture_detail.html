@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Facture {{ facture.numero }}</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'factures_list' %}">Liste des factures</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">{{ facture.numero }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4 no-print">
+    <a href="{% url 'factures_list' %}" class="btn btn-outline-secondary btn-round"><i class="icon-arrow-left me-1"></i> Retour aux factures</a>
+    <div class="ms-md-auto py-2 py-md-0">
+        <a href="{% url 'commande_detail' facture.commande.pk %}" class="btn btn-outline-primary btn-round"><i class="icon-basket me-1"></i> Voir la commande</a>
+        <button type="button" class="btn btn-primary btn-round ms-2" onclick="window.print()"><i class="icon-printer me-1"></i> Imprimer</button>
+    </div>
+</div>
+
+<div class="invoice-wrap p-4">
+    <div class="row pb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold mb-1 text-primary">Quick Order</h2>
+            <div class="text-muted">
+                Restaurant & Livraison<br>
+                Dakar, Sénégal<br>
+                Tel : +221 33 000 00 00<br>
+                contact@quickorder.sn
+            </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <h1 class="fw-bold mb-1">FACTURE</h1>
+            <div class="text-muted">
+                <div>N° <strong>{{ facture.numero }}</strong></div>
+                <div>Date : {{ facture.date_facture|date:"d/m/Y H:i" }}</div>
+                <div>
+                    {% if facture.statut == 'PAYEE' %}
+                        <span class="badge badge-success">Payée</span>
+                    {% elif facture.statut == 'PARTIELLE' %}
+                        <span class="badge badge-warning">Partielle</span>
+                    {% else %}
+                        <span class="badge badge-danger">Non payée</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="row pb-3">
+        <div class="col-md-6">
+            <h5 class="text-muted text-uppercase">Facturé à</h5>
+            <div class="fw-bold">{{ facture.commande.client.nom }} {{ facture.commande.client.prenom }}</div>
+            <div>{{ facture.commande.client.telephone }}</div>
+            {% if facture.commande.client.email %}<div>{{ facture.commande.client.email }}</div>{% endif %}
+            {% if facture.commande.adresse_livraison %}
+                <div class="mt-2 text-muted">
+                    <i class="icon-location-pin"></i>
+                    {{ facture.commande.adresse_livraison.adresse }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6 text-md-end">
+            <h5 class="text-muted text-uppercase">Commande</h5>
+            <div class="fw-bold">{{ facture.commande.numero }}</div>
+            <div>Passée le {{ facture.commande.date_commande|date:"d/m/Y H:i" }}</div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle mb-3">
+            <thead class="thead-light">
+                <tr>
+                    <th>Désignation</th>
+                    <th class="text-center">Quantité</th>
+                    <th class="text-end">Prix unitaire</th>
+                    <th class="text-end">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ligne in facture.commande.lignes.all %}
+                <tr>
+                    <td>
+                        {{ ligne.produit.nom }}
+                        {% if ligne.note %}<br><small class="text-muted"><i class="icon-note"></i> {{ ligne.note }}</small>{% endif %}
+                    </td>
+                    <td class="text-center">{{ ligne.quantite }}</td>
+                    <td class="text-end">{{ ligne.prix_unitaire|floatformat:0 }} FCFA</td>
+                    <td class="text-end">{{ ligne.sous_total|floatformat:0 }} FCFA</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-3">Aucune ligne.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row justify-content-end">
+        <div class="col-md-5">
+            <table class="table table-sm mb-3">
+                <tr>
+                    <td class="text-muted">Sous-total</td>
+                    <td class="text-end">{{ facture.commande.total|floatformat:0 }} FCFA</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Frais de livraison</td>
+                    <td class="text-end">{{ facture.commande.frais_livraison|floatformat:0 }} FCFA</td>
+                </tr>
+                <tr class="border-top">
+                    <td class="fw-bold">Total à payer</td>
+                    <td class="text-end fw-bold fs-5 text-primary">{{ facture.montant|floatformat:0 }} FCFA</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Montant payé</td>
+                    <td class="text-end text-success">{{ facture.montant_paye|floatformat:0 }} FCFA</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Reste à payer</td>
+                    <td class="text-end fw-bold {% if facture.montant_restant > 0 %}text-danger{% endif %}">{{ facture.montant_restant|floatformat:0 }} FCFA</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0"><i class="icon-wallet me-1"></i> Paiements enregistrés</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mode de paiement</th>
+                            <th>Référence</th>
+                            <th class="text-end">Montant</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paiement in facture.paiements.all %}
+                        <tr>
+                            <td>{{ paiement.date_paiement|date:"d/m/Y H:i" }}</td>
+                            <td>{{ paiement.get_mode_paiement_display }}</td>
+                            <td>{{ paiement.reference|default:"—" }}</td>
+                            <td class="text-end">{{ paiement.montant|floatformat:0 }} FCFA</td>
+                            <td>
+                                {% if paiement.statut == 'VALIDE' %}
+                                    <span class="badge badge-success">Validé</span>
+                                {% elif paiement.statut == 'ANNULE' %}
+                                    <span class="badge badge-danger">Annulé</span>
+                                {% else %}
+                                    <span class="badge badge-warning">En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">Aucun paiement enregistré.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center text-muted mt-4">
+        Merci de votre confiance — <strong>Quick Order</strong>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.invoice-wrap {
+    background: #fff;
+    border-radius: 0.75rem;
+    border: 1px solid #e8e8e8;
+}
+
+@media print {
+    .sidebar, .main-panel .navbar, .no-print, .page-header {
+        display: none !important;
+    }
+    .main-panel {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    .invoice-wrap {
+        border: none;
+        border-radius: 0;
+    }
+    body {
+        background: #fff !important;
+    }
+}
+</style>
+{% endblock %}

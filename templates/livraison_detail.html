@@ -37,7 +37,7 @@
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Livraison LVR-{{ livraison.pk|stringformat:"06d" }}</h4>
-                <i class="icon-social-twitter text-primary" style="font-size: 1.5rem;"></i>
+                <i class="fas fa-truck text-primary" style="font-size: 1.5rem;"></i>
             </div>
             <div class="card-body">
                 <table class="table table-striped align-middle mb-0">
@@ -105,15 +105,14 @@
             </div>
             <div class="card-body">
                 <div class="border rounded p-3 bg-light">
-                    {% if coords %}
-                        <div id="map" style="height: 380px; border-radius: 0.5rem;"></div>
-                    {% else %}
-                        <div class="text-center text-muted py-5">
-                            <i class="icon-location-pin mb-3 d-block" style="font-size: 2.5rem;"></i>
-                            <h5>Aucune position disponible</h5>
-                            <p class="mb-0">L'adresse de livraison ne possède pas de coordonnées (latitude / longitude).</p>
+                    {% if not coords %}
+                        <div class="alert alert-warning py-2 mb-3">
+                            Cette adresse ne possède pas de coordonnées GPS (latitude / longitude).
+                            La carte est centrée sur la position par défaut. Renseignez les coordonnées
+                            de l'adresse pour afficher la position exacte de la livraison.
                         </div>
                     {% endif %}
+                    <div id="map" style="height: 380px; border-radius: 0.5rem;"></div>
                 </div>
             </div>
         </div>
@@ -122,21 +121,35 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if coords %}
 <link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
 <script src="{% static 'js/plugin/leaflet/leaflet.js' %}"></script>
+{{ coords|json_script:"livraison-coords" }}
 <script>
 $(document).ready(function () {
-    var map = L.map('map').setView([{{ coords.lat }}, {{ coords.lon }}], 15);
+    var coords = JSON.parse(document.getElementById('livraison-coords').textContent);
+    var hasCoords = coords && coords.lat !== null && coords.lon !== null;
+    var lat = hasCoords ? coords.lat : 14.7167;
+    var lon = hasCoords ? coords.lon : -17.4677;
+
+    var map = L.map('map').setView([lat, lon], 15);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         subdomains: 'abcd',
         detectRetina: true,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
-    var marker = L.marker([{{ coords.lat }}, {{ coords.lon }}]).addTo(map);
-    marker.bindPopup('<strong>Livraison LVR-{{ livraison.pk|stringformat:"06d" }}</strong><br>{{ livraison.adresse }}').openPopup();
+
+    {% if coords %}
+        var marker = L.marker([lat, lon]).addTo(map);
+        marker.bindPopup('<strong>Livraison LVR-{{ livraison.pk|stringformat:"06d" }}</strong><br>{{ livraison.adresse }}').openPopup();
+    {% else %}
+        L.circleMarker([lat, lon], {
+            radius: 8,
+            color: '#6c757d',
+            fillColor: '#6c757d',
+            fillOpacity: 0.5
+        }).addTo(map).bindPopup('Position de la livraison non renseignée.');
+    {% endif %}
 });
 </script>
-{% endif %}
 {% endblock %}

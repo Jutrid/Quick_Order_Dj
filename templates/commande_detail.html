@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Détail de la commande</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'order_list' %}">Liste des commandes</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">{{ commande.numero }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <a href="{% url 'order_list' %}" class="btn btn-outline-secondary btn-round"><i class="icon-arrow-left me-1"></i> Retour aux commandes</a>
+    <div class="ms-md-auto py-2 py-md-0">
+        <span class="badge {% if commande.statut == 'LIVREE' %}badge-success{% elif commande.statut == 'EN_PREPARATION' %}badge-info{% elif commande.statut == 'PRETE' %}badge-primary{% elif commande.statut == 'ANNULEE' %}badge-danger{% else %}badge-warning{% endif %} p-2">{{ commande.get_statut_display }}</span>
+        <a href="{% url 'commande_update' commande.pk %}" class="btn btn-primary btn-round ms-2"><i class="icon-pencil me-1"></i> Modifier</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Commande {{ commande.numero }}</h4>
+                <i class="icon-basket text-primary" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped align-middle mb-0">
+                    <tbody>
+                        <tr>
+                            <th style="width: 40%;" class="text-muted">Client</th>
+                            <td>{{ commande.client.nom }} {{ commande.client.prenom }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Téléphone</th>
+                            <td>{{ commande.client.telephone }}</td>
+                        </tr>
+                        {% if commande.client.email %}
+                        <tr>
+                            <th class="text-muted">Email</th>
+                            <td>{{ commande.client.email }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th class="text-muted">Date de commande</th>
+                            <td>{{ commande.date_commande|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Heure souhaitée</th>
+                            <td>{% if commande.heure_souhaitee %}{{ commande.heure_souhaitee|date:"H:i" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Adresse de livraison</th>
+                            <td>{% if commande.adresse_livraison %}{{ commande.adresse_livraison.adresse }}{% else %}<span class="text-muted">Non renseignée</span>{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">À livrer</th>
+                            <td>
+                                {% if commande.a_livree %}
+                                    <span class="badge badge-success">Oui</span>
+                                    {% if commande.livreur %}<span class="ms-1">{{ commande.livreur.nom }}</span>{% endif %}
+                                {% else %}
+                                    <span class="badge badge-secondary">Non</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Statut</th>
+                            <td>
+                                {% if commande.statut == 'LIVREE' %}
+                                    <span class="badge badge-success">Livrée</span>
+                                {% elif commande.statut == 'EN_LIVRAISON' %}
+                                    <span class="badge badge-info">En livraison</span>
+                                {% elif commande.statut == 'PRETE' %}
+                                    <span class="badge badge-primary">Prête</span>
+                                {% elif commande.statut == 'EN_PREPARATION' %}
+                                    <span class="badge badge-info">En préparation</span>
+                                {% elif commande.statut == 'ANNULEE' %}
+                                    <span class="badge badge-danger">Annulée</span>
+                                {% else %}
+                                    <span class="badge badge-warning">En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Commentaire</th>
+                            <td>{{ commande.commentaire|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Facture</th>
+                            <td>
+                                {% if commande.facture %}
+                                    <a href="{% url 'facture_detail' commande.facture.pk %}" class="btn btn-link btn-primary p-0">{{ commande.facture.numero }} <i class="icon-eye"></i></a>
+                                {% else %}
+                                    <span class="text-muted">Non générée</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Total</th>
+                            <td class="fw-bold">{{ commande.total|floatformat:0 }} FCFA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="card-title mb-0"><i class="icon-basket-loaded me-1"></i> Lignes de la commande</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-end">P.U.</th>
+                                <th class="text-end">Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ligne in commande.lignes.all %}
+                            <tr>
+                                <td>
+                                    {{ ligne.produit.nom }}
+                                    {% if ligne.note %}<br><small class="text-muted"><i class="icon-note"></i> {{ ligne.note }}</small>{% endif %}
+                                </td>
+                                <td class="text-center">{{ ligne.quantite }}</td>
+                                <td class="text-end">{{ ligne.prix_unitaire|floatformat:0 }}</td>
+                                <td class="text-end">{{ ligne.sous_total|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Aucune ligne.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end text-muted">Sous-total</td>
+                                <td class="text-end">{{ commande.total|floatformat:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end text-muted">Frais de livraison</td>
+                                <td class="text-end">{{ commande.frais_livraison|floatformat:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold">Total</td>
+                                <td class="text-end fw-bold">{{ commande.total|floatformat:0 }} FCFA</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

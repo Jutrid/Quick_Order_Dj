@@ -28,7 +28,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-pie-chart text-warning"></i>
+                <i class="fas fa-users text-warning"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-wallet text-success"></i>
+                <i class="fas fa-shopping-bag text-success"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -66,7 +66,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-close text-danger"></i>
+                <i class="fas fa-user-times text-danger"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -85,7 +85,7 @@
         <div class="row">
             <div class="col-5">
             <div class="icon-big text-center">
-                <i class="icon-social-twitter text-primary"></i>
+                <i class="fas fa-shopping-cart text-primary"></i>
             </div>
             </div>
             <div class="col-7 col-stats">
@@ -150,6 +150,7 @@
                             <td>{{ client.email }}</td>
                             <td>
                               <div class="form-button-action">
+                                <a href="{% url 'client_detail' client.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-success btn-lg" data-original-title="Détails du client"><i class="icon-eye"></i></a>
                                 <a href="{% url 'client_update' client.pk %}" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Modifier"><i class="fa fa-edit"></i></a>
                                 <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger btn-delete-client" data-url="{% url 'client_delete' client.pk %}" data-name="{{ client.nom }} {{ client.prenom }}" data-original-title="Supprimer"><i class="fa fa-times"></i></button>
                               </div>

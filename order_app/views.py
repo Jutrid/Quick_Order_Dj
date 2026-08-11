@@ -3,7 +3,8 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.db.models import Count, ProtectedError, Q, Sum
+from django.db.models import Count, F, ProtectedError, Q, Sum
+from django.db.models.functions import Greatest
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.utils import timezone
@@ -19,10 +20,9 @@ from .forms import (
     LivreurForm,
     PaiementForm,
     ProduitForm,
-    TailleProduitForm,
     UserCreationForm,
 )
-from .models import AdresseLivraison, Categorie, Client, Commande, Facture, LigneCommande, Livraison, Livreur, Paiement, Produit, TailleProduit
+from .models import AdresseLivraison, Categorie, Client, Commande, Facture, LigneCommande, Livraison, Livreur, MouvementStock, Paiement, Produit
 
 
 # Create your views here.
@@ -83,6 +83,7 @@ def commande_create(request):
                 sum(l.sous_total for l in commande.lignes.all()) + commande.frais_livraison
             )
             commande.save(update_fields=['total'])
+            commande.diminuer_stock()
             return redirect('order_list')
     return render(request, 'forms/commande_form.html', {
         'form': form,
@@ -105,8 +106,47 @@ def commande_update(request, pk):
         ):
             form.add_error(None, 'Ajoutez au moins un produit à la commande.')
         else:
+            ancien_statut = commande.statut
+            anciennes = {}
+            for ligne in commande.lignes.select_related('produit'):
+                if ligne.produit.soumis_stock:
+                    anciennes[ligne.produit_id] = anciennes.get(ligne.produit_id, 0) + ligne.quantite
+            if ancien_statut == Commande.Statut.ANNULEE:
+                for produit_id in anciennes:
+                    anciennes[produit_id] = 0
+
             commande = form.save()
             formset.save()
+
+            nouvelles = {}
+            for ligne in commande.lignes.select_related('produit'):
+                if ligne.produit.soumis_stock:
+                    nouvelles[ligne.produit_id] = nouvelles.get(ligne.produit_id, 0) + ligne.quantite
+            if commande.statut == Commande.Statut.ANNULEE:
+                for produit_id in nouvelles:
+                    nouvelles[produit_id] = 0
+
+            for produit_id in set(anciennes) | set(nouvelles):
+                delta = anciennes.get(produit_id, 0) - nouvelles.get(produit_id, 0)
+                if delta > 0:
+                    Produit.objects.filter(pk=produit_id).update(stock=F('stock') + delta)
+                    MouvementStock.objects.create(
+                        produit_id=produit_id,
+                        type_mouvement=MouvementStock.TypeMouvement.ENTREE,
+                        quantite=delta,
+                        description=f"Retour commande {commande.numero}",
+                    )
+                elif delta < 0:
+                    Produit.objects.filter(pk=produit_id).update(
+                        stock=Greatest(F('stock') - (-delta), 0)
+                    )
+                    MouvementStock.objects.create(
+                        produit_id=produit_id,
+                        type_mouvement=MouvementStock.TypeMouvement.SORTIE,
+                        quantite=-delta,
+                        description=f"Commande {commande.numero}",
+                    )
+
             commande.total = (
                 sum(l.sous_total for l in commande.lignes.all()) + commande.frais_livraison
             )
@@ -124,6 +164,7 @@ def commande_update(request, pk):
 def commande_delete(request, pk):
     commande = get_object_or_404(Commande, pk=pk)
     if request.method == 'POST':
+        commande.rendre_stock()
         commande.delete()
     return redirect('order_list')
 
@@ -139,8 +180,13 @@ def commande_statut(request, pk):
                     and statut != Commande.Statut.ANNULEE:
                 pass
             else:
+                ancien_statut = commande.statut
                 commande.statut = statut
                 commande.save(update_fields=['statut'])
+                if statut == Commande.Statut.ANNULEE and ancien_statut != Commande.Statut.ANNULEE:
+                    commande.rendre_stock()
+                elif statut != Commande.Statut.ANNULEE and ancien_statut == Commande.Statut.ANNULEE:
+                    commande.diminuer_stock()
                 if statut == Commande.Statut.PRETE:
                     if not hasattr(commande, 'facture'):
                         Facture.objects.create(
@@ -192,36 +238,6 @@ def categorie_delete(request, pk):
 
 
 @login_required(login_url='login')
-def taille_create(request):
-    form = TailleProduitForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('tailles_list')
-    return render(request, 'forms/taille_form.html', {'form': form, 'title': 'Ajouter une taille'})
-
-
-@login_required(login_url='login')
-def taille_update(request, pk):
-    taille = get_object_or_404(TailleProduit, pk=pk)
-    form = TailleProduitForm(request.POST or None, instance=taille)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('tailles_list')
-    return render(request, 'forms/taille_form.html', {'form': form, 'title': 'Modifier une taille'})
-
-
-@login_required(login_url='login')
-def taille_delete(request, pk):
-    taille = get_object_or_404(TailleProduit, pk=pk)
-    if request.method == 'POST':
-        try:
-            taille.delete()
-        except ProtectedError:
-            return redirect(reverse('tailles_list') + '?error=protected')
-    return redirect('tailles_list')
-
-
-@login_required(login_url='login')
 def produit_create(request):
     form = ProduitForm(request.POST or None, request.FILES or None)
     if request.method == 'POST' and form.is_valid():
@@ -245,6 +261,32 @@ def produit_delete(request, pk):
     produit = get_object_or_404(Produit, pk=pk)
     if request.method == 'POST':
         produit.delete()
+    return redirect('products_list')
+
+
+@login_required(login_url='login')
+def produit_mouvement_stock(request, pk):
+    produit = get_object_or_404(Produit, pk=pk)
+    if request.method == 'POST' and produit.soumis_stock:
+        type_mouvement = request.POST.get('type_mouvement')
+        description = request.POST.get('description', '').strip()
+        try:
+            quantite = int(request.POST.get('quantite', ''))
+        except (TypeError, ValueError):
+            quantite = 0
+        if type_mouvement in MouvementStock.TypeMouvement.values and quantite > 0:
+            if type_mouvement == MouvementStock.TypeMouvement.ENTREE:
+                Produit.objects.filter(pk=produit.pk).update(stock=F('stock') + quantite)
+            else:
+                Produit.objects.filter(pk=produit.pk).update(
+                    stock=Greatest(F('stock') - quantite, 0)
+                )
+            MouvementStock.objects.create(
+                produit=produit,
+                type_mouvement=type_mouvement,
+                quantite=quantite,
+                description=description,
+            )
     return redirect('products_list')
 
 
@@ -308,8 +350,24 @@ def clients_list(request):
     })
 
 
+def client_detail(request, pk):
+    client = get_object_or_404(
+        Client.objects.prefetch_related('adresses', 'commandes__lignes__produit'),
+        pk=pk,
+    )
+    commandes = client.commandes.order_by('-date_commande')
+    nb_commandes = commandes.count()
+    total_depense = sum(c.total for c in commandes.exclude(statut=Commande.Statut.ANNULEE))
+    return render(request, 'client_detail.html', {
+        'client': client,
+        'commandes': commandes,
+        'nb_commandes': nb_commandes,
+        'total_depense': total_depense,
+    })
+
+
 def products_list(request):
-    produits = Produit.objects.select_related('categorie', 'taille').all()
+    produits = Produit.objects.select_related('categorie').all()
     total = produits.count()
     disponibles = produits.filter(disponible=True).count()
     indisponibles = produits.filter(disponible=False).count()
@@ -321,6 +379,53 @@ def products_list(request):
         'indisponibles': indisponibles,
         'categories': categories,
     })
+
+
+def produit_detail(request, pk):
+    produit = get_object_or_404(
+        Produit.objects.select_related('categorie').prefetch_related('mouvements'),
+        pk=pk,
+    )
+    mouvements = produit.mouvements.all()[:10]
+    nb_ventes = sum(l.quantite for l in produit.lignecommande_set.all())
+    return render(request, 'produit_detail.html', {
+        'produit': produit,
+        'mouvements': mouvements,
+        'nb_ventes': nb_ventes,
+    })
+
+
+def mouvements_stock_list(request):
+    mouvements = MouvementStock.objects.select_related('produit').all()
+    total = mouvements.count()
+    entrees = mouvements.filter(type_mouvement=MouvementStock.TypeMouvement.ENTREE).count()
+    sorties = mouvements.filter(type_mouvement=MouvementStock.TypeMouvement.SORTIE).count()
+    produits_stock = Produit.objects.filter(soumis_stock=True).count()
+    return render(request, 'mouvements_stock_list.html', {
+        'mouvements': mouvements,
+        'total': total,
+        'entrees': entrees,
+        'sorties': sorties,
+        'produits_stock': produits_stock,
+    })
+
+
+def commande_detail(request, pk):
+    commande = get_object_or_404(
+        Commande.objects.select_related('client', 'adresse_livraison', 'livreur')
+            .prefetch_related('lignes__produit'),
+        pk=pk,
+    )
+    return render(request, 'commande_detail.html', {'commande': commande})
+
+
+def facture_detail(request, pk):
+    facture = get_object_or_404(
+        Facture.objects.select_related('commande__client', 'commande__adresse_livraison')
+            .prefetch_related('commande__lignes__produit', 'paiements'),
+        pk=pk,
+    )
+    return render(request, 'facture_detail.html', {'facture': facture})
 
 
 def factures_list(request):
@@ -454,22 +559,6 @@ def categories_list(request):
     total_produits = Produit.objects.count()
     return render(request, 'categories_list.html', {
         'categories': categories,
-        'total': total,
-        'avec_produits': avec_produits,
-        'sans_produits': sans_produits,
-        'total_produits': total_produits,
-        'error': request.GET.get('error'),
-    })
-
-
-def tailles_list(request):
-    tailles = TailleProduit.objects.annotate(nb_produits=Count('produits')).all()
-    total = tailles.count()
-    avec_produits = tailles.filter(nb_produits__gt=0).count()
-    sans_produits = tailles.filter(nb_produits=0).count()
-    total_produits = Produit.objects.count()
-    return render(request, 'tailles_list.html', {
-        'tailles': tailles,
         'total': total,
         'avec_produits': avec_produits,
         'sans_produits': sans_produits,

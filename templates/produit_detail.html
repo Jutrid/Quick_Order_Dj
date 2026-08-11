@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Détail du produit</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="{% url 'home' %}">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'products_list' %}">Liste des produits</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">{{ produit.nom }}</a>
+        </li>
+    </ul>
+</div>
+
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <a href="{% url 'products_list' %}" class="btn btn-outline-secondary btn-round"><i class="icon-arrow-left me-1"></i> Retour aux produits</a>
+    <div class="ms-md-auto py-2 py-md-0">
+        <a href="{% url 'produit_update' produit.pk %}" class="btn btn-primary btn-round"><i class="icon-pencil me-1"></i> Modifier</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">{{ produit.nom }}</h4>
+                <i class="icon-box text-primary" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if produit.image %}
+                    <div class="col-md-4 mb-3">
+                        <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="img-fluid rounded" style="max-height: 180px; object-fit: cover; width: 100%;">
+                    </div>
+                    {% endif %}
+                    <div class="col-md-{% if produit.image %}8{% else %}12{% endif %}">
+                        <table class="table table-striped align-middle mb-0">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 40%;" class="text-muted">Référence</th>
+                                    <td>{{ produit.reference|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Catégorie</th>
+                                    <td>{{ produit.categorie.nom }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Prix</th>
+                                    <td class="fw-bold">{{ produit.prix|floatformat:0 }} FCFA</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Disponible</th>
+                                    <td>
+                                        {% if produit.disponible %}
+                                            <span class="badge badge-success">Oui</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Non</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Géré en stock</th>
+                                    <td>
+                                        {% if produit.soumis_stock %}
+                                            <span class="badge badge-success">Oui</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Non</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if produit.soumis_stock %}
+                                <tr>
+                                    <th class="text-muted">Stock actuel</th>
+                                    <td class="fw-bold">{{ produit.stock }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th class="text-muted">Temps de préparation</th>
+                                    <td>{% if produit.temps_preparation_defini and produit.temps_preparation %}{{ produit.temps_preparation }} min{% else %}<span class="text-muted">Non défini</span>{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Total vendu</th>
+                                    <td>{{ nb_ventes }} article(s)</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Description</th>
+                                    <td>{{ produit.description|default:"—" }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="icon-refresh me-1"></i> Derniers mouvements de stock</h4>
+                <a href="{% url 'mouvements_stock_list' %}" class="small">Tout voir</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th class="text-end">Qté</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mvt in mouvements %}
+                            <tr>
+                                <td>{{ mvt.date|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if mvt.type_mouvement == 'ENTREE' %}
+                                        <span class="badge badge-success">Entrée</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Sortie</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">{{ mvt.quantite }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">Aucun mouvement de stock pour ce produit.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

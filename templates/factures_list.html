@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -98,7 +99,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Montant total</p>
-                <h4 class="card-title">{{ montant_total|floatformat:0 }} FCFA</h4>
+                <h4 class="card-title">{{ montant_total|montant }}</h4>
             </div>
             </div>
         </div>
@@ -149,7 +150,7 @@
                             <td>{{ facture.commande.numero }}</td>
                             <td>{{ facture.commande.client.nom }} {{ facture.commande.client.prenom }}</td>
                             <td>{{ facture.date_facture|date:"d/m/Y H:i" }}</td>
-                            <td>{{ facture.montant|floatformat:0 }} FCFA</td>
+                            <td>{{ facture.montant|montant }}</td>
                             <td>
                               {% if facture.statut == 'PAYEE' %}
                                 <span class="badge badge-success">Payée</span>
@@ -194,8 +195,8 @@
 {% block extra_js %}
 <script>
 $(document).ready(function () {
-    function formatFCFA(n) {
-        return n.toLocaleString('fr-FR') + ' FCFA';
+    function formatCDF(n) {
+        return n.toLocaleString('fr-FR') + ' CDF';
     }
 
     $(document).on('click', '.btn-payer-facture', function (e) {
@@ -214,7 +215,7 @@ $(document).ready(function () {
         }
         swal({
             title: 'Encaisser un paiement',
-            text: 'Facture « ' + nom + ' » — reste à payer : ' + formatFCFA(reste),
+            text: 'Facture « ' + nom + ' » — reste à payer : ' + formatCDF(reste),
             icon: 'info',
             content: {
                 element: 'input',
@@ -234,7 +235,7 @@ $(document).ready(function () {
                     return;
                 }
                 if (m > reste) {
-                    swal({ title: 'Montant trop élevé', text: 'Le montant ne peut pas dépasser le reste de la facture (' + formatFCFA(reste) + ').', icon: 'error', button: 'Fermer' });
+                    swal({ title: 'Montant trop élevé', text: 'Le montant ne peut pas dépasser le reste de la facture (' + formatCDF(reste) + ').', icon: 'error', button: 'Fermer' });
                     return;
                 }
                 $('#form-payer-facture input[name="montant"]').val(montant);

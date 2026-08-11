@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -98,7 +99,7 @@
             <div class="col-7 col-stats">
             <div class="numbers">
                 <p class="card-category">Montant encaissé</p>
-                <h4 class="card-title">{{ encaisse|floatformat:0 }} FCFA</h4>
+                <h4 class="card-title">{{ encaisse|montant }}</h4>
             </div>
             </div>
         </div>
@@ -148,7 +149,7 @@
                             <td>{% if paiement.reference %}{{ paiement.reference }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
                             <td>{{ paiement.facture.numero }}</td>
                             <td>{{ paiement.date_paiement|date:"d/m/Y H:i" }}</td>
-                            <td>{{ paiement.montant|floatformat:0 }} FCFA</td>
+                            <td>{{ paiement.montant|montant }}</td>
                             <td>{{ paiement.get_mode_paiement_display }}</td>
                             <td>
                               {% if paiement.statut == 'VALIDE' %}

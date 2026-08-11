@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -145,7 +146,7 @@
                             <td>{{ livraison.commande.client.nom }} {{ livraison.commande.client.prenom }}</td>
                             <td>{% if livraison.livreur %}{{ livraison.livreur.nom }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
                             <td>{{ livraison.adresse }}</td>
-                            <td>{{ livraison.cout_livraison|floatformat:0 }} FCFA</td>
+                            <td>{{ livraison.cout_livraison|montant }}</td>
                             <td>
                               {% if livraison.statut == 'LIVREE' %}
                                 <span class="badge badge-success">Livrée</span>

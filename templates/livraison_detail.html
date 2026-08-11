@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load monetaire %}
 
 {% block content %}
 <div class="page-header">
@@ -64,7 +65,7 @@
                         </tr>
                         <tr>
                             <th class="text-muted">Coût de livraison</th>
-                            <td>{{ livraison.cout_livraison|floatformat:0 }} FCFA</td>
+                            <td>{{ livraison.cout_livraison|montant }}</td>
                         </tr>
                         <tr>
                             <th class="text-muted">Statut</th>

@@ -79,12 +79,13 @@ class ProduitForm(forms.ModelForm):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ['nom', 'prenom', 'telephone', 'email']
+        fields = ['nom', 'prenom', 'telephone', 'email', 'photo']
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
             'prenom': forms.TextInput(attrs={'class': 'form-control'}),
             'telephone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
 

@@ -265,6 +265,15 @@ $(document).ready(function () {
     });
     {% endif %}
 
+    {% if commande_created %}
+    swal({
+        title: 'Commande enregistrée',
+        text: 'Votre commande a bien été créée.',
+        icon: 'success',
+        button: 'Fermer',
+    });
+    {% endif %}
+
     $(document).on('click', '.btn-delete-commande', function (e) {
         e.preventDefault();
         var $btn = $(this);

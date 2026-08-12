@@ -28,6 +28,8 @@ class FormViewsTests(TestCase):
 
 class AdressesLivraisonViewsTests(TestCase):
     def setUp(self):
+        self.user = get_user_model().objects.create_user(username='admin', password='StrongPass123!')
+        self.client.force_login(self.user)
         self.client1 = Client.objects.create(nom="Diop", prenom="Moussa", telephone="771234567")
         self.client2 = Client.objects.create(nom="Ba", prenom="Awa", telephone="781234567")
 
@@ -48,6 +50,29 @@ class AdressesLivraisonViewsTests(TestCase):
         response = self.client.get(reverse('adresses_livraison_list'), {'q': 'thiès'})
         self.assertContains(response, 'Bureau')
         self.assertNotContains(response, 'Maison')
+
+    def test_adresse_update_page_is_accessible(self):
+        adresse = AdresseLivraison.objects.get(client=self.client1)
+        response = self.client.get(reverse('adresse_update', args=[adresse.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_adresse_update_saves_data(self):
+        adresse = AdresseLivraison.objects.get(client=self.client1)
+        response = self.client.post(reverse('adresse_update', args=[adresse.pk]), {
+            'client': self.client1.pk,
+            'nom': 'Travail',
+            'adresse': 'Goma, RDC',
+        })
+        self.assertRedirects(response, reverse('adresses_livraison_list'))
+        adresse.refresh_from_db()
+        self.assertEqual(adresse.nom, 'Travail')
+        self.assertEqual(adresse.adresse, 'Goma, RDC')
+
+    def test_adresse_delete_removes_adresse(self):
+        adresse = AdresseLivraison.objects.get(client=self.client1)
+        response = self.client.post(reverse('adresse_delete', args=[adresse.pk]))
+        self.assertRedirects(response, reverse('adresses_livraison_list'))
+        self.assertFalse(AdresseLivraison.objects.filter(pk=adresse.pk).exists())
 
 
 class FacturePaiementTests(TestCase):
@@ -248,9 +273,18 @@ class StockTests(TestCase):
             'lignes-1-quantite': '3',
         })
 
-    def test_creation_commande_diminue_stock_des_produits_soumis_stock(self):
+    def test_creation_commande_ne_diminue_pas_le_stock(self):
         response = self._post_commande(quantite=2)
-        self.assertRedirects(response, reverse('order_list'))
+        self.assertRedirects(response, reverse('order_list') + '?commande_created=1')
+        self.produit_stock.refresh_from_db()
+        self.produit_sans_stock.refresh_from_db()
+        self.assertEqual(self.produit_stock.stock, 10)
+        self.assertEqual(self.produit_sans_stock.stock, 0)
+
+    def test_statut_prete_diminue_stock_des_produits_soumis_stock(self):
+        self._post_commande(quantite=2)
+        commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
         self.produit_stock.refresh_from_db()
         self.produit_sans_stock.refresh_from_db()
         self.assertEqual(self.produit_stock.stock, 8)
@@ -259,6 +293,9 @@ class StockTests(TestCase):
     def test_annulation_commande_rend_stock(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
+        self.produit_stock.refresh_from_db()
+        self.assertEqual(self.produit_stock.stock, 8)
         response = self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'ANNULEE'})
         self.assertRedirects(response, reverse('order_list'))
         commande.refresh_from_db()
@@ -266,9 +303,19 @@ class StockTests(TestCase):
         self.produit_stock.refresh_from_db()
         self.assertEqual(self.produit_stock.stock, 10)
 
+    def test_annulation_commande_en_attente_ne_modifie_pas_le_stock(self):
+        self._post_commande(quantite=2)
+        commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'ANNULEE'})
+        self.produit_stock.refresh_from_db()
+        self.assertEqual(self.produit_stock.stock, 10)
+
     def test_suppression_commande_rend_stock(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
+        self.produit_stock.refresh_from_db()
+        self.assertEqual(self.produit_stock.stock, 8)
         response = self.client.post(reverse('commande_delete', args=[commande.pk]))
         self.assertRedirects(response, reverse('order_list'))
         self.assertFalse(Commande.objects.filter(pk=commande.pk).exists())
@@ -278,13 +325,14 @@ class StockTests(TestCase):
     def test_modification_commande_ajuste_stock(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
         ligne = commande.lignes.get(produit=self.produit_stock)
         response = self.client.post(reverse('commande_update', args=[commande.pk]), {
             'client': self.client_objet.pk,
             'adresse_livraison': self.adresse.pk,
             'frais_livraison': '0',
             'a_livree': 'on',
-            'statut': 'EN_ATTENTE',
+            'statut': 'PRETE',
             'commentaire': '',
             'lignes-TOTAL_FORMS': '1',
             'lignes-INITIAL_FORMS': '1',
@@ -298,9 +346,15 @@ class StockTests(TestCase):
         self.produit_stock.refresh_from_db()
         self.assertEqual(self.produit_stock.stock, 5)
 
-    def test_creation_commande_cree_un_mouvement_sortie_automatique(self):
+    def test_creation_commande_ne_cree_pas_de_mouvement_stock(self):
+        self._post_commande(quantite=2)
+        self.assertFalse(MouvementStock.objects.filter(produit=self.produit_stock).exists())
+        self.assertFalse(MouvementStock.objects.filter(produit=self.produit_sans_stock).exists())
+
+    def test_statut_prete_cree_un_mouvement_sortie_automatique(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
         mouvement = MouvementStock.objects.get(produit=self.produit_stock)
         self.assertEqual(mouvement.type_mouvement, MouvementStock.TypeMouvement.SORTIE)
         self.assertEqual(mouvement.quantite, 2)
@@ -310,6 +364,7 @@ class StockTests(TestCase):
     def test_annulation_commande_cree_un_mouvement_entree_automatique(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
         self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'ANNULEE'})
         mouvements = MouvementStock.objects.filter(produit=self.produit_stock).order_by('id')
         self.assertEqual(mouvements.count(), 2)
@@ -320,6 +375,7 @@ class StockTests(TestCase):
     def test_suppression_commande_cree_un_mouvement_entree_automatique(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
         self.client.post(reverse('commande_delete', args=[commande.pk]))
         mouvements = MouvementStock.objects.filter(produit=self.produit_stock).order_by('id')
         self.assertEqual(mouvements.count(), 2)
@@ -330,13 +386,14 @@ class StockTests(TestCase):
     def test_modification_commande_cree_un_mouvement_pour_le_delta(self):
         self._post_commande(quantite=2)
         commande = Commande.objects.get(client=self.client_objet)
+        self.client.post(reverse('commande_statut', args=[commande.pk]), {'statut': 'PRETE'})
         ligne = commande.lignes.get(produit=self.produit_stock)
         self.client.post(reverse('commande_update', args=[commande.pk]), {
             'client': self.client_objet.pk,
             'adresse_livraison': self.adresse.pk,
             'frais_livraison': '0',
             'a_livree': 'on',
-            'statut': 'EN_ATTENTE',
+            'statut': 'PRETE',
             'commentaire': '',
             'lignes-TOTAL_FORMS': '1',
             'lignes-INITIAL_FORMS': '1',

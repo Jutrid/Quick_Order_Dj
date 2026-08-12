@@ -38,7 +38,11 @@
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">{{ client.nom }} {{ client.prenom }}</h4>
-                <i class="icon-user text-primary" style="font-size: 1.5rem;"></i>
+                {% if client.photo %}
+                    <img src="{{ client.photo.url }}" alt="{{ client.nom }} {{ client.prenom }}" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;">
+                {% else %}
+                    <i class="icon-user text-primary" style="font-size: 1.5rem;"></i>
+                {% endif %}
             </div>
             <div class="card-body">
                 <table class="table table-striped align-middle mb-0">

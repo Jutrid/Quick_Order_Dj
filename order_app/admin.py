@@ -112,6 +112,7 @@ class ClientAdmin(admin.ModelAdmin):
         "prenom",
         "telephone",
         "email",
+        "photo",
     )
 
     search_fields = (

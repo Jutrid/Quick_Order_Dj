@@ -137,6 +137,12 @@ class Client(models.Model):
 
     email = models.EmailField(blank=True)
 
+    photo = models.ImageField(
+        upload_to="clients/",
+        blank=True,
+        null=True
+    )
+
     def __str__(self):
         return f"{self.nom} {self.prenom}"
 

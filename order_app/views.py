@@ -25,6 +25,13 @@ from .forms import (
 from .models import AdresseLivraison, Categorie, Client, Commande, Facture, LigneCommande, Livraison, Livreur, MouvementStock, Paiement, Produit
 
 
+STATUTS_AVEC_STOCK_SORTI = (
+    Commande.Statut.PRETE,
+    Commande.Statut.EN_LIVRAISON,
+    Commande.Statut.LIVREE,
+)
+
+
 # Create your views here.
 
 
@@ -42,6 +49,7 @@ def order_list(request):
         'livrees': livrees,
         'statuts': Commande.Statut.choices,
         'facture_created': request.GET.get('facture_created'),
+        'commande_created': request.GET.get('commande_created'),
     })
 
 
@@ -83,8 +91,7 @@ def commande_create(request):
                 sum(l.sous_total for l in commande.lignes.all()) + commande.frais_livraison
             )
             commande.save(update_fields=['total'])
-            commande.diminuer_stock()
-            return redirect('order_list')
+            return redirect(reverse('order_list') + '?commande_created=1')
     return render(request, 'forms/commande_form.html', {
         'form': form,
         'ligne_formset': formset,
@@ -111,7 +118,7 @@ def commande_update(request, pk):
             for ligne in commande.lignes.select_related('produit'):
                 if ligne.produit.soumis_stock:
                     anciennes[ligne.produit_id] = anciennes.get(ligne.produit_id, 0) + ligne.quantite
-            if ancien_statut == Commande.Statut.ANNULEE:
+            if ancien_statut not in STATUTS_AVEC_STOCK_SORTI:
                 for produit_id in anciennes:
                     anciennes[produit_id] = 0
 
@@ -122,7 +129,7 @@ def commande_update(request, pk):
             for ligne in commande.lignes.select_related('produit'):
                 if ligne.produit.soumis_stock:
                     nouvelles[ligne.produit_id] = nouvelles.get(ligne.produit_id, 0) + ligne.quantite
-            if commande.statut == Commande.Statut.ANNULEE:
+            if commande.statut not in STATUTS_AVEC_STOCK_SORTI:
                 for produit_id in nouvelles:
                     nouvelles[produit_id] = 0
 
@@ -176,16 +183,17 @@ def commande_statut(request, pk):
     if request.method == 'POST':
         statut = request.POST.get('statut')
         if statut in Commande.Statut.values:
-            if commande.statut in (Commande.Statut.PRETE, Commande.Statut.EN_LIVRAISON, Commande.Statut.LIVREE) \
+            if commande.statut in STATUTS_AVEC_STOCK_SORTI \
                     and statut != Commande.Statut.ANNULEE:
                 pass
             else:
                 ancien_statut = commande.statut
+                stock_sorti = ancien_statut in STATUTS_AVEC_STOCK_SORTI
                 commande.statut = statut
                 commande.save(update_fields=['statut'])
-                if statut == Commande.Statut.ANNULEE and ancien_statut != Commande.Statut.ANNULEE:
+                if statut == Commande.Statut.ANNULEE and stock_sorti:
                     commande.rendre_stock()
-                elif statut != Commande.Statut.ANNULEE and ancien_statut == Commande.Statut.ANNULEE:
+                elif statut == Commande.Statut.PRETE and not stock_sorti:
                     commande.diminuer_stock()
                 if statut == Commande.Statut.PRETE:
                     if not hasattr(commande, 'facture'):
@@ -292,7 +300,7 @@ def produit_mouvement_stock(request, pk):
 
 @login_required(login_url='login')
 def client_create(request):
-    form = ClientForm(request.POST or None)
+    form = ClientForm(request.POST or None, request.FILES or None)
     if request.method == 'POST' and form.is_valid():
         form.save()
         return redirect('clients_list')
@@ -302,7 +310,7 @@ def client_create(request):
 @login_required(login_url='login')
 def client_update(request, pk):
     client = get_object_or_404(Client, pk=pk)
-    form = ClientForm(request.POST or None, instance=client)
+    form = ClientForm(request.POST or None, request.FILES or None, instance=client)
     if request.method == 'POST' and form.is_valid():
         form.save()
         return redirect('clients_list')
@@ -324,6 +332,24 @@ def adresse_create(request):
         form.save()
         return redirect('adresses_livraison_list')
     return render(request, 'forms/adresse_form.html', {'form': form, 'title': 'Ajouter une adresse'})
+
+
+@login_required(login_url='login')
+def adresse_update(request, pk):
+    adresse = get_object_or_404(AdresseLivraison, pk=pk)
+    form = AdresseLivraisonForm(request.POST or None, instance=adresse)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('adresses_livraison_list')
+    return render(request, 'forms/adresse_form.html', {'form': form, 'title': 'Modifier une adresse'})
+
+
+@login_required(login_url='login')
+def adresse_delete(request, pk):
+    adresse = get_object_or_404(AdresseLivraison, pk=pk)
+    if request.method == 'POST':
+        adresse.delete()
+    return redirect('adresses_livraison_list')
 
 
 @login_required(login_url='login')
